@@ -1,0 +1,755 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>算数トレーニング - どの計算かな？</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Hiragino Maru Gothic ProN', 'BIZ UDPGothic', sans-serif;
+      background: linear-gradient(135deg, #fce4ec 0%, #f8bbd9 30%, #e1bee7 60%, #d1c4e9 100%);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 16px;
+    }
+
+    .screen {
+      display: none;
+      width: 100%;
+      max-width: 640px;
+      animation: fadeIn 0.4s ease;
+    }
+    .screen.active { display: block; }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(12px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    .card {
+      background: rgba(255,255,255,0.92);
+      border-radius: 28px;
+      padding: 32px 28px;
+      box-shadow: 0 8px 32px rgba(180,100,200,0.18);
+    }
+
+    h1 {
+      font-size: 2rem;
+      color: #8e4eaa;
+      text-align: center;
+      margin-bottom: 8px;
+      letter-spacing: 2px;
+    }
+
+    .subtitle {
+      text-align: center;
+      color: #b06ac0;
+      font-size: 1rem;
+      margin-bottom: 28px;
+    }
+
+    .mode-cards {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .mode-card {
+      background: linear-gradient(135deg, #f3e5f5, #fce4ec);
+      border: 3px solid #ce93d8;
+      border-radius: 20px;
+      padding: 22px 24px;
+      cursor: pointer;
+      transition: all 0.2s;
+      text-align: center;
+    }
+    .mode-card:hover, .mode-card:active {
+      background: linear-gradient(135deg, #ce93d8, #f48fb1);
+      border-color: #ab47bc;
+      transform: scale(1.02);
+    }
+    .mode-card h2 { color: #6a1b9a; font-size: 1.4rem; margin-bottom: 6px; }
+    .mode-card p { color: #8e24aa; font-size: 0.92rem; }
+
+    .mode-badge {
+      display: inline-block;
+      background: #ab47bc;
+      color: white;
+      border-radius: 20px;
+      padding: 2px 14px;
+      font-size: 0.8rem;
+      margin-bottom: 10px;
+    }
+
+    /* Progress bar */
+    .progress-wrap {
+      margin-bottom: 20px;
+    }
+    .progress-info {
+      display: flex;
+      justify-content: space-between;
+      color: #8e4eaa;
+      font-size: 0.9rem;
+      margin-bottom: 6px;
+      font-weight: bold;
+    }
+    .progress-bar {
+      background: #e1bee7;
+      border-radius: 10px;
+      height: 12px;
+      overflow: hidden;
+    }
+    .progress-fill {
+      background: linear-gradient(90deg, #ce93d8, #f48fb1);
+      height: 100%;
+      border-radius: 10px;
+      transition: width 0.4s ease;
+    }
+
+    /* Trick banner */
+    .trick-banner {
+      display: none;
+      background: linear-gradient(135deg, #ff8f00, #ffca28);
+      color: white;
+      text-align: center;
+      border-radius: 16px;
+      padding: 12px 20px;
+      font-size: 1.05rem;
+      font-weight: bold;
+      margin-bottom: 16px;
+      animation: pulse 1s ease infinite alternate;
+    }
+    @keyframes pulse {
+      from { box-shadow: 0 0 0 rgba(255,143,0,0.4); }
+      to   { box-shadow: 0 0 16px rgba(255,143,0,0.6); }
+    }
+
+    /* Question */
+    .question-num {
+      font-size: 0.85rem;
+      color: #ab47bc;
+      margin-bottom: 8px;
+    }
+    .question-text {
+      background: #f3e5f5;
+      border-left: 5px solid #ce93d8;
+      border-radius: 0 16px 16px 0;
+      padding: 18px 20px;
+      font-size: 1.15rem;
+      line-height: 1.7;
+      color: #3a003f;
+      margin-bottom: 24px;
+    }
+
+    /* Answer buttons */
+    .answer-buttons {
+      display: grid;
+      gap: 12px;
+    }
+    .answer-buttons.mode2 { grid-template-columns: 1fr 1fr; }
+    .answer-buttons.mode4 { grid-template-columns: 1fr 1fr; }
+
+    .answer-btn {
+      padding: 18px 12px;
+      border: 3px solid #ce93d8;
+      border-radius: 18px;
+      background: white;
+      font-size: 1.2rem;
+      font-weight: bold;
+      color: #6a1b9a;
+      cursor: pointer;
+      transition: all 0.18s;
+      letter-spacing: 1px;
+    }
+    .answer-btn:hover:not(:disabled) {
+      background: linear-gradient(135deg, #f3e5f5, #fce4ec);
+      border-color: #ab47bc;
+      transform: scale(1.04);
+    }
+    .answer-btn.correct {
+      background: linear-gradient(135deg, #a5d6a7, #c8e6c9);
+      border-color: #43a047;
+      color: #1b5e20;
+      animation: popIn 0.3s ease;
+    }
+    .answer-btn.wrong {
+      background: linear-gradient(135deg, #ef9a9a, #ffcdd2);
+      border-color: #e53935;
+      color: #b71c1c;
+      animation: shake 0.4s ease;
+    }
+    .answer-btn:disabled { cursor: default; }
+
+    @keyframes popIn {
+      0%   { transform: scale(1); }
+      50%  { transform: scale(1.1); }
+      100% { transform: scale(1); }
+    }
+    @keyframes shake {
+      0%,100% { transform: translateX(0); }
+      25%      { transform: translateX(-6px); }
+      75%      { transform: translateX(6px); }
+    }
+
+    /* Explanation panel */
+    .explain-panel {
+      display: none;
+      margin-top: 20px;
+      border-radius: 16px;
+      padding: 18px 20px;
+      animation: fadeIn 0.3s ease;
+    }
+    .explain-panel.correct-panel {
+      background: #e8f5e9;
+      border: 2px solid #66bb6a;
+    }
+    .explain-panel.wrong-panel {
+      background: #fff8e1;
+      border: 2px solid #ffa726;
+    }
+    .explain-label {
+      font-size: 1.3rem;
+      font-weight: bold;
+      margin-bottom: 8px;
+    }
+    .explain-panel.correct-panel .explain-label { color: #2e7d32; }
+    .explain-panel.wrong-panel .explain-label { color: #e65100; }
+    .explain-text { color: #4a4a4a; font-size: 0.95rem; line-height: 1.6; }
+
+    .next-btn {
+      display: block;
+      width: 100%;
+      margin-top: 14px;
+      padding: 14px;
+      background: linear-gradient(135deg, #ce93d8, #f48fb1);
+      color: white;
+      border: none;
+      border-radius: 18px;
+      font-size: 1.1rem;
+      font-weight: bold;
+      cursor: pointer;
+      transition: all 0.18s;
+    }
+    .next-btn:hover { opacity: 0.88; transform: scale(1.02); }
+
+    /* Timer */
+    .timer-display {
+      text-align: center;
+      color: #8e4eaa;
+      font-size: 0.9rem;
+      margin-bottom: 16px;
+    }
+    .timer-num { font-size: 1.3rem; font-weight: bold; }
+
+    /* Result screen */
+    .result-title {
+      text-align: center;
+      font-size: 1.8rem;
+      color: #6a1b9a;
+      margin-bottom: 4px;
+    }
+    .stars {
+      text-align: center;
+      font-size: 2.4rem;
+      margin: 12px 0;
+    }
+    .result-comment {
+      text-align: center;
+      font-size: 1.05rem;
+      color: #8e4eaa;
+      margin-bottom: 20px;
+      font-weight: bold;
+    }
+    .result-stats {
+      display: flex;
+      justify-content: center;
+      gap: 28px;
+      margin-bottom: 24px;
+    }
+    .stat-box {
+      background: #f3e5f5;
+      border-radius: 16px;
+      padding: 14px 22px;
+      text-align: center;
+    }
+    .stat-num { font-size: 2rem; font-weight: bold; color: #6a1b9a; }
+    .stat-label { font-size: 0.82rem; color: #ab47bc; }
+
+    .wrong-list { margin-bottom: 20px; }
+    .wrong-list h3 { color: #6a1b9a; font-size: 1rem; margin-bottom: 10px; }
+    .wrong-item {
+      background: #fff8e1;
+      border-left: 4px solid #ffa726;
+      border-radius: 0 12px 12px 0;
+      padding: 10px 14px;
+      margin-bottom: 8px;
+      font-size: 0.9rem;
+    }
+    .wrong-item .correct-ans {
+      font-weight: bold;
+      color: #e65100;
+      margin-top: 4px;
+    }
+
+    .result-buttons { display: flex; flex-direction: column; gap: 10px; }
+    .btn-primary {
+      padding: 16px;
+      background: linear-gradient(135deg, #ce93d8, #f48fb1);
+      color: white;
+      border: none;
+      border-radius: 18px;
+      font-size: 1.1rem;
+      font-weight: bold;
+      cursor: pointer;
+      transition: all 0.18s;
+    }
+    .btn-primary:hover { opacity: 0.88; transform: scale(1.02); }
+    .btn-secondary {
+      padding: 14px;
+      background: white;
+      color: #ab47bc;
+      border: 2.5px solid #ce93d8;
+      border-radius: 18px;
+      font-size: 1rem;
+      font-weight: bold;
+      cursor: pointer;
+      transition: all 0.18s;
+    }
+    .btn-secondary:hover { background: #f3e5f5; }
+
+    /* Flash overlay */
+    .flash-overlay {
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      pointer-events: none;
+      opacity: 0;
+      transition: opacity 0.15s;
+      z-index: 999;
+    }
+    .flash-overlay.correct-flash { background: rgba(100, 200, 100, 0.25); }
+    .flash-overlay.wrong-flash   { background: rgba(220, 80, 80, 0.2); }
+    .flash-overlay.show { opacity: 1; }
+  </style>
+</head>
+<body>
+
+<div class="flash-overlay" id="flashOverlay"></div>
+
+<!-- タイトル画面 -->
+<div class="screen active card" id="screenTitle">
+  <h1>算数トレーニング</h1>
+  <p class="subtitle">どの計算かな？ぱぱっと選ぼう！</p>
+  <div class="mode-cards">
+    <div class="mode-card" onclick="startGame(2)">
+      <span class="mode-badge">まずはここから</span>
+      <h2>かけ算 or わり算モード</h2>
+      <p>2つから選ぶ！かけ算とわり算をマスターしよう</p>
+    </div>
+    <div class="mode-card" onclick="startGame(4)">
+      <span class="mode-badge">チャレンジ</span>
+      <h2>4つから選ぶモード</h2>
+      <p>たし算・ひき算・かけ算・わり算、ぜんぶから選ぶ上級モード</p>
+    </div>
+  </div>
+</div>
+
+<!-- 問題画面 -->
+<div class="screen card" id="screenQuestion">
+  <div class="progress-wrap">
+    <div class="progress-info">
+      <span id="progressText">1 / 10</span>
+      <span class="timer-num" id="timerText">0.0秒</span>
+    </div>
+    <div class="progress-bar"><div class="progress-fill" id="progressFill" style="width:10%"></div></div>
+  </div>
+
+  <div class="trick-banner" id="trickBanner">⚡ ひっかけ問題だよ！気をつけて！⚡</div>
+
+  <div class="question-text" id="questionText">問題文</div>
+
+  <div class="answer-buttons mode2" id="answerButtons"></div>
+
+  <div class="explain-panel" id="explainPanel">
+    <div class="explain-label" id="explainLabel"></div>
+    <div class="explain-text" id="explainText"></div>
+    <button class="next-btn" id="nextBtn" onclick="nextQuestion()">次へ →</button>
+  </div>
+</div>
+
+<!-- 結果画面 -->
+<div class="screen card" id="screenResult">
+  <div class="result-title">結果発表！</div>
+  <div class="stars" id="resultStars">★★★</div>
+  <div class="result-comment" id="resultComment"></div>
+  <div class="result-stats">
+    <div class="stat-box">
+      <div class="stat-num" id="resultScore">0</div>
+      <div class="stat-label">/ 10問 正解</div>
+    </div>
+    <div class="stat-box">
+      <div class="stat-num" id="resultTime">0</div>
+      <div class="stat-label">秒</div>
+    </div>
+  </div>
+  <div class="wrong-list" id="wrongList"></div>
+  <div class="result-buttons">
+    <button class="btn-primary" id="retryBtn" onclick="retryGame()">もう一度！</button>
+    <button class="btn-secondary" onclick="showTitle()">モード選択に戻る</button>
+  </div>
+</div>
+
+<script>
+// ============================================================
+// 問題データ
+// ============================================================
+const normalProblems = [
+  // ---- かけ算 (25問) ----
+  {id:1,  text:"りんごが1箱に6個入っています。4箱では何個になりますか？", answer:"かけ算", shortExplain:"1箱の数×箱の数＝全部の数 だからかけ算だよ！", longExplain:"「1つあたりの数 × いくつ分 ＝ 全体」がかけ算の形です。1箱に6個、4箱分なので 6×4 を計算します。", isTrick:false},
+  {id:2,  text:"えんぴつが1セットに8本あります。5セット買うと、えんぴつは全部で何本ですか？", answer:"かけ算", shortExplain:"1セットの本数×セット数＝全部の本数 だからかけ算だよ！", longExplain:"「1セット8本」が「5セット分」なので、8×5 を計算します。同じ数のまとまりが何個分あるか、というときはかけ算です。", isTrick:false},
+  {id:3,  text:"1本30円のガムを7本買いました。代金はいくらですか？", answer:"かけ算", shortExplain:"1本の値段×本数＝代金 だからかけ算だよ！", longExplain:"「1つの値段 × 個数 ＝ 代金」はかけ算の典型パターンです。30×7 を計算します。", isTrick:false},
+  {id:4,  text:"教室のいすが1列に9脚ずつならんでいます。6列あると、いすは全部で何脚ですか？", answer:"かけ算", shortExplain:"1列の数×列の数＝全部の数 だからかけ算だよ！", longExplain:"「1列9脚」が「6列分」なので、9×6 を計算します。「ずつ」という言葉があるときはかけ算が多いです。", isTrick:false},
+  {id:5,  text:"たまごが1パックに10個入っています。3パックでは何個になりますか？", answer:"かけ算", shortExplain:"1パックの個数×パック数＝全部の個数 だからかけ算だよ！", longExplain:"「1パック10個 × 3パック ＝ 30個」という形でかけ算になります。", isTrick:false},
+  {id:6,  text:"1mの値段が80円のリボンを5m買いました。代金はいくらですか？", answer:"かけ算", shortExplain:"1mの値段×m数＝代金 だからかけ算だよ！", longExplain:"「1mあたり80円 × 5m ＝ 400円」という形のかけ算です。「1つあたり」がわかっていて、それがいくつ分かを求めるときはかけ算です。", isTrick:false},
+  {id:7,  text:"子どもが1人に4枚ずつシールをくばります。8人にくばると、シールは何枚いりますか？", answer:"かけ算", shortExplain:"1人分のシール×人数＝必要な枚数 だからかけ算だよ！", longExplain:"「1人に4枚」が「8人分」なので 4×8 を計算します。「ずつ」があってそれが何人分かを求めるときはかけ算です。", isTrick:false},
+  {id:8,  text:"ノートが1冊90円です。7冊買うと代金はいくらですか？", answer:"かけ算", shortExplain:"1冊の値段×冊数＝代金 だからかけ算だよ！", longExplain:"「1冊90円 × 7冊 ＝ 630円」というかけ算になります。", isTrick:false},
+  {id:9,  text:"1日に25ページずつ本を読みます。4日間では何ページ読めますか？", answer:"かけ算", shortExplain:"1日のページ数×日数＝全部のページ数 だからかけ算だよ！", longExplain:"「1日25ページ × 4日 ＝ 100ページ」です。毎日同じ量がある（ずつ）ときはかけ算のサインです。", isTrick:false},
+  {id:10, text:"花びんに花を6本ずつ入れます。花びんが5つあると、花は何本いりますか？", answer:"かけ算", shortExplain:"1つの花びんの本数×花びんの数＝全部の本数 だからかけ算だよ！", longExplain:"「1つに6本 × 5つ ＝ 30本」というかけ算になります。", isTrick:false},
+  {id:11, text:"バスに30人乗れます。同じバスが4台あると、全部で何人乗れますか？", answer:"かけ算", shortExplain:"1台に乗れる人数×台数＝全部で乗れる人数 だからかけ算だよ！", longExplain:"「1台30人 × 4台 ＝ 120人」です。1台あたりの人数が決まっていて、台数分だからかけ算です。", isTrick:false},
+  {id:12, text:"みかんが1かごに15個あります。7かごでは何個になりますか？", answer:"かけ算", shortExplain:"1かごの個数×かごの数＝全部の個数 だからかけ算だよ！", longExplain:"「1かご15個 × 7かご ＝ 105個」です。", isTrick:false},
+  {id:13, text:"正方形の1辺の長さが7cmです。まわりの長さは何cmですか？", answer:"かけ算", shortExplain:"1辺の長さ×4辺＝まわりの長さ だからかけ算だよ！", longExplain:"正方形は4つの辺がすべて同じ長さなので 7×4 ＝ 28cm です。「同じ長さが4つ分」だからかけ算になります。", isTrick:false},
+  {id:14, text:"横8cm、縦5cmの長方形の面積は何cm²ですか？", answer:"かけ算", shortExplain:"横×縦＝面積 だからかけ算だよ！", longExplain:"長方形の面積は「横 × 縦」で求めます。8×5 ＝ 40cm² です。", isTrick:false},
+  {id:15, text:"1週間は7日です。6週間では何日ですか？", answer:"かけ算", shortExplain:"1週間の日数×週数＝全部の日数 だからかけ算だよ！", longExplain:"「7日 × 6週間 ＝ 42日」です。", isTrick:false},
+  {id:16, text:"子ども1人に画用紙を5枚ずつ配ります。9人のクラスでは何枚必要ですか？", answer:"かけ算", shortExplain:"1人分の枚数×人数＝必要な枚数 だからかけ算だよ！", longExplain:"「1人5枚 × 9人 ＝ 45枚」です。", isTrick:false},
+  {id:17, text:"りんごジュースが1本150mLです。6本分は何mLですか？", answer:"かけ算", shortExplain:"1本分のmL×本数＝全部のmL だからかけ算だよ！", longExplain:"「1本150mL × 6本 ＝ 900mL」です。", isTrick:false},
+  {id:18, text:"縄跳びを1分間に50回とびます。3分間では何回とべますか？", answer:"かけ算", shortExplain:"1分間の回数×分数＝全部の回数 だからかけ算だよ！", longExplain:"「1分50回 × 3分 ＝ 150回」です。", isTrick:false},
+  {id:19, text:"スタンプを1列に9個ならべます。6列では全部で何個ならびますか？", answer:"かけ算", shortExplain:"1列の個数×列の数＝全部の個数 だからかけ算だよ！", longExplain:"「1列9個 × 6列 ＝ 54個」です。", isTrick:false},
+  {id:20, text:"ゼリーが1箱に12個入っています。5箱では何個になりますか？", answer:"かけ算", shortExplain:"1箱の個数×箱の数＝全部の個数 だからかけ算だよ！", longExplain:"「1箱12個 × 5箱 ＝ 60個」です。", isTrick:false},
+  {id:21, text:"お弁当箱を1個280円で4個買いました。代金は全部でいくらですか？", answer:"かけ算", shortExplain:"1個の値段×個数＝代金 だからかけ算だよ！", longExplain:"「280円 × 4個 ＝ 1120円」です。", isTrick:false},
+  {id:22, text:"1袋に400gの砂糖が入っています。5袋では何gになりますか？", answer:"かけ算", shortExplain:"1袋の重さ×袋の数＝全部の重さ だからかけ算だよ！", longExplain:"「400g × 5袋 ＝ 2000g」です。", isTrick:false},
+  {id:23, text:"植木が1プランターに4株ずつ植えてあります。11プランターでは何株ですか？", answer:"かけ算", shortExplain:"1プランターの株数×プランター数＝全部の株数 だからかけ算だよ！", longExplain:"「4株 × 11プランター ＝ 44株」です。「ずつ」がついて同じ数のまとまりがいくつかあるときはかけ算です。", isTrick:false},
+  {id:24, text:"長さ3mのロープが6本あります。全部の長さは何mですか？", answer:"かけ算", shortExplain:"1本の長さ×本数＝全部の長さ だからかけ算だよ！", longExplain:"「3m × 6本 ＝ 18m」です。", isTrick:false},
+  {id:25, text:"1台のロボットが1時間に20個のパーツを組み立てます。3時間では何個組み立てられますか？", answer:"かけ算", shortExplain:"1時間の個数×時間＝全部の個数 だからかけ算だよ！", longExplain:"「1時間20個 × 3時間 ＝ 60個」です。1時間あたりの量 × 時間 の形はかけ算です。", isTrick:false},
+
+  // ---- わり算 (25問) ----
+  {id:26, text:"32個のあめを4人で同じ数ずつ分けると、1人何個になりますか？", answer:"わり算", shortExplain:"全部の数÷人数＝1人分の数 だからわり算だよ！", longExplain:"全体を同じ数ずつ分けるとき、1人分がいくつになるかを求めるのはわり算です。32÷4 ＝ 8個です。", isTrick:false},
+  {id:27, text:"36枚の色紙を6人に同じ枚数ずつ配ると、1人何枚になりますか？", answer:"わり算", shortExplain:"全部の枚数÷人数＝1人分の枚数 だからわり算だよ！", longExplain:"「全体 ÷ 人数 ＝ 1人分」の形はわり算です。36÷6 ＝ 6枚です。", isTrick:false},
+  {id:28, text:"56cmのリボンを7等分すると、1つ分の長さは何cmになりますか？", answer:"わり算", shortExplain:"全体の長さ÷等分数＝1つ分の長さ だからわり算だよ！", longExplain:"「等分」という言葉があれば、全体をいくつかに分けるのでわり算です。56÷7 ＝ 8cmです。", isTrick:false},
+  {id:29, text:"48個のたまごを6個ずつ箱に入れると、箱は何箱いりますか？", answer:"わり算", shortExplain:"全部の個数÷1箱の個数＝箱の数 だからわり算だよ！", longExplain:"「全部 ÷ 1つ分の数 ＝ いくつ分」の形もわり算です。48÷6 ＝ 8箱です。", isTrick:false},
+  {id:30, text:"45人の生徒を9つのグループに同じ人数ずつ分けると、1グループ何人になりますか？", answer:"わり算", shortExplain:"全体の人数÷グループ数＝1グループの人数 だからわり算だよ！", longExplain:"「45人 ÷ 9グループ ＝ 5人」です。全体を同じ数のグループに分けるのはわり算です。", isTrick:false},
+  {id:31, text:"84mのロープを12mずつ切ると、何本できますか？", answer:"わり算", shortExplain:"全体の長さ÷1本分の長さ＝何本 だからわり算だよ！", longExplain:"「全体 ÷ 1つ分 ＝ いくつ分」の形はわり算です。84÷12 ＝ 7本です。", isTrick:false},
+  {id:32, text:"35個のクッキーを7枚のお皿に同じ数ずつ乗せると、1皿何個ですか？", answer:"わり算", shortExplain:"全体の個数÷皿の数＝1皿の個数 だからわり算だよ！", longExplain:"「35個 ÷ 7皿 ＝ 5個」です。", isTrick:false},
+  {id:33, text:"花が54本あります。6本ずつたばにすると、何束できますか？", answer:"わり算", shortExplain:"全体の本数÷1束の本数＝束の数 だからわり算だよ！", longExplain:"「54本 ÷ 6本 ＝ 9束」です。全体を1つ分の数で割ると、いくつ分になるかがわかります。", isTrick:false},
+  {id:34, text:"120ページの本を1日15ページずつ読むと、何日で読み終わりますか？", answer:"わり算", shortExplain:"全部のページ÷1日のページ＝日数 だからわり算だよ！", longExplain:"「全体 ÷ 1日分 ＝ 日数」の形はわり算です。120÷15 ＝ 8日です。", isTrick:false},
+  {id:35, text:"90cmのひもを10cmずつに切ると、何本になりますか？", answer:"わり算", shortExplain:"全体の長さ÷1本分の長さ＝本数 だからわり算だよ！", longExplain:"「90÷10 ＝ 9本」です。全体の量 ÷ 1つ分 ＝ 何個分 の形はわり算です。", isTrick:false},
+  {id:36, text:"75個のあめを5人で平等に分けると、1人何個になりますか？", answer:"わり算", shortExplain:"全部の個数÷人数＝1人分の個数 だからわり算だよ！", longExplain:"「75÷5 ＝ 15個」です。「平等に分ける」「同じ数ずつ」はわり算のサインです。", isTrick:false},
+  {id:37, text:"63Lの水を7つのバケツに同じ量ずつ入れると、1つのバケツに何Lですか？", answer:"わり算", shortExplain:"全体の量÷バケツの数＝1つ分の量 だからわり算だよ！", longExplain:"「63÷7 ＝ 9L」です。", isTrick:false},
+  {id:38, text:"48枚のカードを6枚ずつたばにすると、何たばになりますか？", answer:"わり算", shortExplain:"全体の枚数÷1たばの枚数＝たばの数 だからわり算だよ！", longExplain:"「48÷6 ＝ 8たば」です。", isTrick:false},
+  {id:39, text:"100円で20円のキャンディは何個買えますか？", answer:"わり算", shortExplain:"全部のお金÷1個の値段＝何個買えるか だからわり算だよ！", longExplain:"「100÷20 ＝ 5個」です。全体のお金を1個の値段で割ると何個買えるかがわかります。", isTrick:false},
+  {id:40, text:"サッカー部員40人を5人ずつのチームにわけると、チームは何個できますか？", answer:"わり算", shortExplain:"全員の人数÷1チームの人数＝チーム数 だからわり算だよ！", longExplain:"「40÷5 ＝ 8チーム」です。", isTrick:false},
+  {id:41, text:"プールを1日8Lずつ水を入れます。72L入れるには何日かかりますか？", answer:"わり算", shortExplain:"全体の量÷1日の量＝日数 だからわり算だよ！", longExplain:"「72÷8 ＝ 9日」です。全体 ÷ 1日分 ＝ 何日分 の形はわり算です。", isTrick:false},
+  {id:42, text:"プリント96枚を1クラス12枚ずつ配ると、何クラスに配れますか？", answer:"わり算", shortExplain:"全体の枚数÷1クラスの枚数＝クラス数 だからわり算だよ！", longExplain:"「96÷12 ＝ 8クラス」です。", isTrick:false},
+  {id:43, text:"1本240mLのジュースを3本持っています。同じコップに全部を同じ量ずつ分けると、コップが6個のとき1個何mLですか？", answer:"わり算", shortExplain:"全体のmL÷コップの数＝1個分のmL だからわり算だよ！", longExplain:"まず 240×3 ＝ 720mL。そして 720÷6 ＝ 120mLです。最後は「全体÷個数」のわり算です。", isTrick:false},
+  {id:44, text:"60個のオレンジを1箱に10個ずつ入れると、何箱できますか？", answer:"わり算", shortExplain:"全体の個数÷1箱の個数＝箱の数 だからわり算だよ！", longExplain:"「60÷10 ＝ 6箱」です。", isTrick:false},
+  {id:45, text:"144gのチョコレートを12人で等しく分けると、1人何gになりますか？", answer:"わり算", shortExplain:"全体のg÷人数＝1人分のg だからわり算だよ！", longExplain:"「144÷12 ＝ 12g」です。「等しく分ける」もわり算のサインです。", isTrick:false},
+  {id:46, text:"棒が81cmあります。9cmずつに切ると、何本できますか？", answer:"わり算", shortExplain:"全体の長さ÷1本の長さ＝本数 だからわり算だよ！", longExplain:"「81÷9 ＝ 9本」です。", isTrick:false},
+  {id:47, text:"遠足で80kmのコースを4日間で歩きます。1日あたり何km歩きますか？", answer:"わり算", shortExplain:"全体のkm÷日数＝1日あたりのkm だからわり算だよ！", longExplain:"「80÷4 ＝ 20km」です。「1日あたり」を求めるときは全体÷日数のわり算です。", isTrick:false},
+  {id:48, text:"70人の参加者を7台のバスに同じ人数ずつ乗せると、1台何人になりますか？", answer:"わり算", shortExplain:"全体の人数÷台数＝1台の人数 だからわり算だよ！", longExplain:"「70÷7 ＝ 10人」です。", isTrick:false},
+  {id:49, text:"リボンが108cmあります。9cmずつ切ると何本できますか？", answer:"わり算", shortExplain:"全体の長さ÷1本の長さ＝本数 だからわり算だよ！", longExplain:"「108÷9 ＝ 12本」です。", isTrick:false},
+  {id:50, text:"おはじきが56個あります。8個ずつ袋に入れると、何袋できますか？", answer:"わり算", shortExplain:"全体の個数÷1袋の個数＝袋の数 だからわり算だよ！", longExplain:"「56÷8 ＝ 7袋」です。", isTrick:false},
+
+  // ---- たし算 (25問) ----
+  {id:51, text:"赤いボールが13個、青いボールが9個あります。ボールは全部で何個ですか？", answer:"たし算", shortExplain:"2つのものを合わせるときはたし算だよ！", longExplain:"「赤13個 ＋ 青9個 ＝ 22個」です。2つの量を合わせる（合計を求める）ときはたし算です。", isTrick:false},
+  {id:52, text:"かごに梨が8個、りんごが11個入っています。果物は合わせて何個ですか？", answer:"たし算", shortExplain:"2種類のものを合わせるときはたし算だよ！", longExplain:"「8＋11 ＝ 19個」です。「合わせて」は合計を求めるのでたし算です。", isTrick:false},
+  {id:53, text:"先週は本を16ページ読み、今週は21ページ読みました。2週間で何ページ読みましたか？", answer:"たし算", shortExplain:"2つの週のページ数を合わせるからたし算だよ！", longExplain:"「16 ＋ 21 ＝ 37ページ」です。期間を合わせた合計を求めるのはたし算です。", isTrick:false},
+  {id:54, text:"バス停でバスを待っている人が7人いました。途中で5人乗ってきました。今、バスには何人いますか？", answer:"たし算", shortExplain:"もともとの人数に増えた人数を足すからたし算だよ！", longExplain:"「7＋5 ＝ 12人」です。人数が増えるときはたし算です。", isTrick:false},
+  {id:55, text:"花が赤が24本、黄色が18本あります。全部で何本ですか？", answer:"たし算", shortExplain:"2種類の花を合わせるからたし算だよ！", longExplain:"「24＋18 ＝ 42本」です。", isTrick:false},
+  {id:56, text:"弟は48ページ、姉は63ページの本を読みました。2人合わせて何ページ読みましたか？", answer:"たし算", shortExplain:"2人のページ数を合わせるからたし算だよ！", longExplain:"「48＋63 ＝ 111ページ」です。「合わせて」はたし算のサインです。", isTrick:false},
+  {id:57, text:"冷蔵庫にみかんが14個あります。お母さんが8個買ってきました。今、みかんは何個ありますか？", answer:"たし算", shortExplain:"あった数に加わった数を足すからたし算だよ！", longExplain:"「14＋8 ＝ 22個」です。何かが増えるときはたし算です。", isTrick:false},
+  {id:58, text:"学校の図書館に本が230冊あります。新しく45冊入りました。今、本は何冊ありますか？", answer:"たし算", shortExplain:"もとの冊数に増えた冊数を足すからたし算だよ！", longExplain:"「230＋45 ＝ 275冊」です。", isTrick:false},
+  {id:59, text:"朝29人いたクラスに、転入生が3人来ました。クラスは何人になりましたか？", answer:"たし算", shortExplain:"もとの人数に増えた人数を足すからたし算だよ！", longExplain:"「29＋3 ＝ 32人」です。増える（加わる）のはたし算のサインです。", isTrick:false},
+  {id:60, text:"Aの箱に35個、Bの箱に28個のビー玉が入っています。合計何個ですか？", answer:"たし算", shortExplain:"2つの箱のビー玉を合わせるからたし算だよ！", longExplain:"「35＋28 ＝ 63個」です。", isTrick:false},
+  {id:61, text:"遠足でAコース3kmとBコース2kmを歩きました。全部で何km歩きましたか？", answer:"たし算", shortExplain:"2つのコースのkmを合わせるからたし算だよ！", longExplain:"「3＋2 ＝ 5km」です。", isTrick:false},
+  {id:62, text:"工場で午前に56個、午後に74個の部品を作りました。1日で何個作りましたか？", answer:"たし算", shortExplain:"午前と午後の個数を合わせるからたし算だよ！", longExplain:"「56＋74 ＝ 130個」です。", isTrick:false},
+  {id:63, text:"貯金箱に340円入っています。お小遣いをもらって180円増えました。今、貯金は何円ですか？", answer:"たし算", shortExplain:"もとのお金に増えた金額を足すからたし算だよ！", longExplain:"「340＋180 ＝ 520円」です。", isTrick:false},
+  {id:64, text:"木が公園に17本あります。新たに9本植えました。公園の木は全部で何本ですか？", answer:"たし算", shortExplain:"もとの本数に植えた本数を足すからたし算だよ！", longExplain:"「17＋9 ＝ 26本」です。", isTrick:false},
+  {id:65, text:"牛乳が冷蔵庫に2本、棚に3本あります。全部で何本ですか？", answer:"たし算", shortExplain:"2か所の本数を合わせるからたし算だよ！", longExplain:"「2＋3 ＝ 5本」です。", isTrick:false},
+  {id:66, text:"バスケットボールの試合で第1クォーターに15点、第2クォーターに18点取りました。合計何点ですか？", answer:"たし算", shortExplain:"2つのクォーターの点数を合わせるからたし算だよ！", longExplain:"「15＋18 ＝ 33点」です。「合計」はたし算のサインです。", isTrick:false},
+  {id:67, text:"お父さんの身長は172cm、お母さんの身長は158cmです。2人の身長を合わせると何cmですか？", answer:"たし算", shortExplain:"2人の身長を合わせるからたし算だよ！", longExplain:"「172＋158 ＝ 330cm」です。「合わせる」はたし算です。", isTrick:false},
+  {id:68, text:"青いクレヨンが12本、赤いクレヨンが8本あります。全部で何本ですか？", answer:"たし算", shortExplain:"2種類のクレヨンを合わせるからたし算だよ！", longExplain:"「12＋8 ＝ 20本」です。", isTrick:false},
+  {id:69, text:"電車に32人乗っていました。次の駅で15人乗ってきました。今、何人乗っていますか？", answer:"たし算", shortExplain:"乗っていた人数に乗ってきた人数を足すからたし算だよ！", longExplain:"「32＋15 ＝ 47人」です。人が増えるのはたし算です。", isTrick:false},
+  {id:70, text:"文房具店でノートを120円、ペンを85円買いました。合計いくらですか？", answer:"たし算", shortExplain:"2つの値段を合わせるからたし算だよ！", longExplain:"「120＋85 ＝ 205円」です。", isTrick:false},
+  {id:71, text:"理科の実験で砂を250gと水を300g混ぜます。全部の重さは何gですか？", answer:"たし算", shortExplain:"2つの重さを合わせるからたし算だよ！", longExplain:"「250＋300 ＝ 550g」です。", isTrick:false},
+  {id:72, text:"1組の生徒は32人、2組の生徒は30人います。2クラス合わせると何人ですか？", answer:"たし算", shortExplain:"2クラスの人数を合わせるからたし算だよ！", longExplain:"「32＋30 ＝ 62人」です。", isTrick:false},
+  {id:73, text:"畑にトマトが46個とキュウリが23個なっています。全部で何個ですか？", answer:"たし算", shortExplain:"2種類の野菜を合わせるからたし算だよ！", longExplain:"「46＋23 ＝ 69個」です。", isTrick:false},
+  {id:74, text:"折り紙を昨日15枚、今日22枚折りました。2日で合計何枚折りましたか？", answer:"たし算", shortExplain:"2日分の枚数を合わせるからたし算だよ！", longExplain:"「15＋22 ＝ 37枚」です。", isTrick:false},
+  {id:75, text:"自転車で今日は4km、明日は3km走る予定です。2日間で何km走りますか？", answer:"たし算", shortExplain:"2日分のkmを合わせるからたし算だよ！", longExplain:"「4＋3 ＝ 7km」です。", isTrick:false},
+
+  // ---- ひき算 (25問) ----
+  {id:76, text:"48個のあめのうち、12個を食べました。残りは何個ですか？", answer:"ひき算", shortExplain:"もとの数から使った数を引くからひき算だよ！", longExplain:"「48－12 ＝ 36個」です。何かが減るときや残りを求めるときはひき算です。", isTrick:false},
+  {id:77, text:"バスに35人乗っていました。バス停で8人降りました。今、何人乗っていますか？", answer:"ひき算", shortExplain:"乗っていた人数から降りた人数を引くからひき算だよ！", longExplain:"「35－8 ＝ 27人」です。人が減るのはひき算です。", isTrick:false},
+  {id:78, text:"500円持っていて、160円のおかしを買いました。おつりはいくらですか？", answer:"ひき算", shortExplain:"持っていたお金から使ったお金を引くからひき算だよ！", longExplain:"「500－160 ＝ 340円」です。「おつり」や「残り」を求めるのはひき算です。", isTrick:false},
+  {id:79, text:"水が80L入るタンクに53L入っています。あと何L入りますか？", answer:"ひき算", shortExplain:"タンクの最大量から今の量を引くからひき算だよ！", longExplain:"「80－53 ＝ 27L」です。「あといくつ入るか（残り）」を求めるのはひき算です。", isTrick:false},
+  {id:80, text:"シールが60枚あります。友だちに24枚あげました。残りは何枚ですか？", answer:"ひき算", shortExplain:"もとの枚数からあげた枚数を引くからひき算だよ！", longExplain:"「60－24 ＝ 36枚」です。「あげる」「使う」「食べる」など減るのはひき算です。", isTrick:false},
+  {id:81, text:"リボンが90cmあります。45cm使いました。残りは何cmですか？", answer:"ひき算", shortExplain:"全体の長さから使った長さを引くからひき算だよ！", longExplain:"「90－45 ＝ 45cm」です。", isTrick:false},
+  {id:82, text:"本が75冊あります。図書館に20冊返しました。今、何冊ありますか？", answer:"ひき算", shortExplain:"もとの冊数から返した冊数を引くからひき算だよ！", longExplain:"「75－20 ＝ 55冊」です。返す（減らす）のはひき算です。", isTrick:false},
+  {id:83, text:"バスケの試合で相手チームは50点、わがチームは38点です。何点差ですか？", answer:"ひき算", shortExplain:"大きい点から小さい点を引いて差を出すからひき算だよ！", longExplain:"「50－38 ＝ 12点差」です。「差」を求めるときはひき算です。", isTrick:false},
+  {id:84, text:"山の高さは1200mです。800mまで登りました。頂上まであと何mですか？", answer:"ひき算", shortExplain:"全体の高さから登った高さを引くからひき算だよ！", longExplain:"「1200－800 ＝ 400m」です。「あと何m」は残りを求めるのでひき算です。", isTrick:false},
+  {id:85, text:"鉛筆が20本あります。友だちに7本貸しました。手元に何本残っていますか？", answer:"ひき算", shortExplain:"もとの本数から貸した本数を引くからひき算だよ！", longExplain:"「20－7 ＝ 13本」です。「貸す」も一時的に減るのでひき算です。", isTrick:false},
+  {id:86, text:"公園に子どもが42人いました。16人が帰りました。残りは何人ですか？", answer:"ひき算", shortExplain:"いた人数から帰った人数を引くからひき算だよ！", longExplain:"「42－16 ＝ 26人」です。", isTrick:false},
+  {id:87, text:"Aさんは150cm、Bさんは138cmです。どちらが何cm高いですか？（高さの差を求めましょう）", answer:"ひき算", shortExplain:"2人の身長の差を求めるからひき算だよ！", longExplain:"「150－138 ＝ 12cm」です。「差」「何cm高い・低い」はひき算です。", isTrick:false},
+  {id:88, text:"100点満点のテストで76点とりました。満点との差は何点ですか？", answer:"ひき算", shortExplain:"満点から取った点数を引いて差を出すからひき算だよ！", longExplain:"「100－76 ＝ 24点」です。「満点との差」はひき算です。", isTrick:false},
+  {id:89, text:"牛乳が1000mLありました。340mL飲みました。残りは何mLですか？", answer:"ひき算", shortExplain:"全部の量から飲んだ量を引くからひき算だよ！", longExplain:"「1000－340 ＝ 660mL」です。", isTrick:false},
+  {id:90, text:"工場に部品が200個ありました。今日85個使いました。残りは何個ですか？", answer:"ひき算", shortExplain:"全体の個数から使った個数を引くからひき算だよ！", longExplain:"「200－85 ＝ 115個」です。", isTrick:false},
+  {id:91, text:"クラス30人のうち、給食でお代わりをした人が11人いました。お代わりしなかったのは何人ですか？", answer:"ひき算", shortExplain:"全体の人数からお代わりした人数を引くからひき算だよ！", longExplain:"「30－11 ＝ 19人」です。「～しなかった人数」は全体から引くのでひき算です。", isTrick:false},
+  {id:92, text:"貯金箱に820円あります。600円出しました。残りは何円ですか？", answer:"ひき算", shortExplain:"もとのお金から出したお金を引くからひき算だよ！", longExplain:"「820－600 ＝ 220円」です。", isTrick:false},
+  {id:93, text:"電車の定員が120人で、現在95人乗っています。あと何人乗れますか？", answer:"ひき算", shortExplain:"定員から今の人数を引くからひき算だよ！", longExplain:"「120－95 ＝ 25人」です。「あと何人（残り）」はひき算です。", isTrick:false},
+  {id:94, text:"目標は50問の練習ですが、今日32問やりました。あと何問残っていますか？", answer:"ひき算", shortExplain:"目標数から今やった数を引くからひき算だよ！", longExplain:"「50－32 ＝ 18問」です。残りを求めるのはひき算です。", isTrick:false},
+  {id:95, text:"花が40本あります。花びんに入れるために15本使いました。残りは何本ですか？", answer:"ひき算", shortExplain:"全体の本数から使った本数を引くからひき算だよ！", longExplain:"「40－15 ＝ 25本」です。", isTrick:false},
+  {id:96, text:"スーパーにキャベツが68玉あります。午前中に35玉売れました。残りは何玉ですか？", answer:"ひき算", shortExplain:"全体の玉数から売れた玉数を引くからひき算だよ！", longExplain:"「68－35 ＝ 33玉」です。", isTrick:false},
+  {id:97, text:"ジャムのビンが245gあります。60g使いました。残りは何gですか？", answer:"ひき算", shortExplain:"全体の重さから使った重さを引くからひき算だよ！", longExplain:"「245－60 ＝ 185g」です。", isTrick:false},
+  {id:98, text:"Aさんの体重は43kgで、Bさんは37kgです。2人の体重の差は何kgですか？", answer:"ひき算", shortExplain:"2人の体重の差を求めるからひき算だよ！", longExplain:"「43－37 ＝ 6kg」です。「差」を求めるのはひき算です。", isTrick:false},
+  {id:99, text:"縄跳びを今日150回とびました。目標は200回です。あと何回とべばいいですか？", answer:"ひき算", shortExplain:"目標から今日の回数を引くからひき算だよ！", longExplain:"「200－150 ＝ 50回」です。残り（あといくら）を求めるのはひき算です。", isTrick:false},
+  {id:100,text:"水そうに魚が28匹います。7匹を別の水そうに移しました。残りは何匹ですか？", answer:"ひき算", shortExplain:"もとの匹数から移した匹数を引くからひき算だよ！", longExplain:"「28－7 ＝ 21匹」です。", isTrick:false},
+];
+
+const trickProblems = [
+  {id:201, text:"紙テープがあります。その長さはもとの長さの3倍です。もとの長さが24cmのとき、この紙テープは何cmですか？", answer:"かけ算", shortExplain:"「倍」があるけど、もとの数×倍数を求めるからかけ算だよ！", longExplain:"「〜倍」と聞くとわり算に見えますが、「もとの長さ × 倍数」でわり算になるのは『もとの長さを求めるとき』です。ここは「3倍の長さ」を求めるので 24×3 ＝ 72cm のかけ算です。", isTrick:true},
+  {id:202, text:"赤いリボンの長さは青いリボンの4倍です。赤いリボンが32cmのとき、青いリボンは何cmですか？", answer:"わり算", shortExplain:"「〜倍」とあるけど、もとの長さを求めるからわり算だよ！", longExplain:"「A が B の4倍」のとき、B（もとの数）を求めるには 全体 ÷ 倍数 になります。32÷4 ＝ 8cm のわり算です。「倍」があっても、もとの数を求めるときはわり算です！", isTrick:true},
+  {id:203, text:"クッキーを6人で分けました。1人あたり4個でした。クッキーは全部で何個ありましたか？", answer:"かけ算", shortExplain:"「1人あたり」の数がわかっていて、人数分を求めるからかけ算だよ！", longExplain:"「1人分の数 × 人数 ＝ 全体」の形です。「分ける」とあるのでわり算に見えますが、1人分がわかっていて全体を求めるのはかけ算です。4×6 ＝ 24個です。", isTrick:true},
+  {id:204, text:"テープを同じ長さに切って、12本のテープを作りました。1本の長さは9cmです。はじめのテープは全部で何cmでしたか？", answer:"かけ算", shortExplain:"「切って分けた」が、全体を求めるからかけ算だよ！", longExplain:"「切った」「分けた」はわり算のイメージですが、「1本9cm × 12本 ＝ 全体」という形なのでかけ算です。9×12 ＝ 108cmです。", isTrick:true},
+  {id:205, text:"同じ重さの荷物が8箱あります。ぜんぶの重さは56kgです。1箱の重さは何kgですか？", answer:"わり算", shortExplain:"「ぜんぶで」とあるけど、1箱分を求めるからわり算だよ！", longExplain:"「ぜんぶで」と聞くとたし算に見えますが、全体の重さを箱の数で割ると1箱の重さがわかります。56÷8 ＝ 7kgです。「全体 ÷ 個数 ＝ 1つ分」はわり算です。", isTrick:true},
+  {id:206, text:"子どもたちに同じ枚数ずつカードを配ったら、5人で45枚になりました。1人あたり何枚もらいましたか？", answer:"わり算", shortExplain:"「同じ枚数ずつ」とあるけど、1人分を求めるからわり算だよ！", longExplain:"「ずつ」はかけ算のイメージがありますが、全体 ÷ 人数 ＝ 1人分 を求めるのはわり算です。45÷5 ＝ 9枚です。", isTrick:true},
+  {id:207, text:"ロープが3本あります。ぜんぶつなぐと15mになります。1本のロープは何mですか？", answer:"わり算", shortExplain:"「ぜんぶつなぐ」と聞こえるけど、1本分を求めるからわり算だよ！", longExplain:"「ぜんぶつなぐ」はたし算やかけ算のイメージですが、全体の長さ ÷ 本数 ＝ 1本の長さ を求めるのはわり算です。15÷3 ＝ 5mです。", isTrick:true},
+  {id:208, text:"農園でいちごをつみました。同じかごに7個ずつ入れたら6かごになりました。いちごはぜんぶで何個ありましたか？", answer:"かけ算", shortExplain:"「ぜんぶで何個」を求めるけど、ここは 1かご×かご数 のかけ算だよ！", longExplain:"「7個ずつ × 6かご ＝ 全体」という形なのでかけ算です。「ぜんぶで」と聞くとたし算に見えますが、同じ数のまとまりが複数あるときはかけ算です。7×6 ＝ 42個です。", isTrick:true},
+  {id:209, text:"みんなで72ページの冊子を作りました。1人9ページずつ担当すると、何人で作りましたか？", answer:"わり算", shortExplain:"「みんなで」とあるけど、人数を求めるからわり算だよ！", longExplain:"「みんなで」はたし算のイメージですが、全体 ÷ 1人分 ＝ 人数 を求めるのはわり算です。72÷9 ＝ 8人です。", isTrick:true},
+  {id:210, text:"花だんに花を植えます。1列に8本ずつ植えると、全部で4列になりました。花は何本ありましたか？", answer:"かけ算", shortExplain:"「全部で何列」とあるが、全体の本数を求めるからかけ算だよ！", longExplain:"「1列8本 × 4列 ＝ 全体」という形のかけ算です。「全部で〇列になった」はわり算のイメージですが、元の総数を求めるときは 1列分 × 列数 のかけ算です。8×4 ＝ 32本です。", isTrick:true},
+];
+
+// ============================================================
+// ゲーム状態
+// ============================================================
+let currentMode = 2;
+let selectedQuestions = [];
+let currentIndex = 0;
+let score = 0;
+let wrongQuestions = [];
+let timerInterval = null;
+let elapsedMs = 0;
+let timerStarted = false;
+
+// ============================================================
+// 画面切り替え
+// ============================================================
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+}
+
+function showTitle() {
+  clearInterval(timerInterval);
+  showScreen('screenTitle');
+}
+
+// ============================================================
+// ゲーム開始
+// ============================================================
+function startGame(mode) {
+  currentMode = mode;
+  score = 0;
+  wrongQuestions = [];
+  currentIndex = 0;
+  elapsedMs = 0;
+  timerStarted = false;
+  clearInterval(timerInterval);
+
+  const pool = mode === 2
+    ? normalProblems.filter(p => p.answer === 'かけ算' || p.answer === 'わり算')
+    : normalProblems;
+
+  const shuffledPool = shuffle([...pool]);
+  const normal9 = shuffledPool.slice(0, 9);
+  const trick1 = shuffle([...trickProblems])[0];
+
+  selectedQuestions = [...normal9, trick1];
+
+  showScreen('screenQuestion');
+  showQuestion();
+}
+
+function retryGame() {
+  startGame(currentMode);
+}
+
+// ============================================================
+// 問題表示
+// ============================================================
+function showQuestion() {
+  const q = selectedQuestions[currentIndex];
+  const total = selectedQuestions.length;
+
+  // Progress
+  document.getElementById('progressText').textContent = `${currentIndex + 1} / ${total}`;
+  document.getElementById('progressFill').style.width = `${((currentIndex + 1) / total) * 100}%`;
+
+  // Trick banner (10問目 = index 9)
+  const banner = document.getElementById('trickBanner');
+  banner.style.display = q.isTrick ? 'block' : 'none';
+
+  // Question text
+  document.getElementById('questionText').textContent = q.text;
+
+  // Buttons
+  const btnArea = document.getElementById('answerButtons');
+  btnArea.innerHTML = '';
+
+  let options;
+  if (currentMode === 2) {
+    options = ['かけ算', 'わり算'];
+  } else {
+    options = shuffle(['たし算', 'ひき算', 'かけ算', 'わり算']);
+  }
+
+  btnArea.className = `answer-buttons ${currentMode === 2 ? 'mode2' : 'mode4'}`;
+
+  options.forEach(opt => {
+    const btn = document.createElement('button');
+    btn.className = 'answer-btn';
+    btn.textContent = opt;
+    btn.onclick = () => selectAnswer(opt);
+    btnArea.appendChild(btn);
+  });
+
+  // Hide explain panel
+  const panel = document.getElementById('explainPanel');
+  panel.style.display = 'none';
+  panel.className = 'explain-panel';
+
+  // Start timer on first question
+  if (!timerStarted) {
+    timerStarted = true;
+    timerInterval = setInterval(() => {
+      elapsedMs += 100;
+      document.getElementById('timerText').textContent = (elapsedMs / 1000).toFixed(1) + '秒';
+    }, 100);
+  }
+}
+
+// ============================================================
+// 答え選択
+// ============================================================
+function selectAnswer(selected) {
+  const q = selectedQuestions[currentIndex];
+  const isCorrect = selected === q.answer;
+
+  // Disable all buttons
+  document.querySelectorAll('.answer-btn').forEach(btn => {
+    btn.disabled = true;
+    if (btn.textContent === q.answer) btn.classList.add('correct');
+    if (btn.textContent === selected && !isCorrect) btn.classList.add('wrong');
+  });
+
+  // Flash
+  flashScreen(isCorrect);
+
+  // Explain
+  const panel = document.getElementById('explainPanel');
+  panel.style.display = 'block';
+  panel.className = isCorrect ? 'explain-panel correct-panel' : 'explain-panel wrong-panel';
+  document.getElementById('explainLabel').textContent = isCorrect ? '正解！' : '不正解…';
+  document.getElementById('explainText').textContent = isCorrect ? q.shortExplain : q.longExplain;
+
+  // Score
+  if (isCorrect) {
+    score++;
+  } else {
+    wrongQuestions.push(q);
+  }
+
+  // Stop timer on last question
+  if (currentIndex === selectedQuestions.length - 1) {
+    clearInterval(timerInterval);
+  }
+}
+
+// ============================================================
+// 次の問題
+// ============================================================
+function nextQuestion() {
+  currentIndex++;
+  if (currentIndex >= selectedQuestions.length) {
+    showResult();
+  } else {
+    showQuestion();
+  }
+}
+
+// ============================================================
+// 結果画面
+// ============================================================
+function showResult() {
+  const secs = (elapsedMs / 1000).toFixed(1);
+
+  document.getElementById('resultScore').textContent = `${score}`;
+  document.getElementById('resultTime').textContent = secs;
+
+  // Stars
+  let stars = '★★★';
+  if (score <= 5) stars = '★☆☆';
+  else if (score <= 7) stars = '★★☆';
+  document.getElementById('resultStars').textContent = stars;
+
+  // Comment
+  const comments = {
+    10: ['パーフェクト！！最高だよ！全問正解すごい！', '10問全部正解！天才かも！？', 'やったー！完璧！また挑戦してね！'],
+    9:  ['あと1問だったね！次は完璧だ！', 'すごい！9問正解！もう少し！', 'ほぼ完璧！次はパーフェクトねらおう！'],
+    8:  ['いいね！8問正解！よく頑張った！', '8問正解！なかなかすごいよ！', '8問正解！だんだん上手くなってきてるね！'],
+    7:  ['7問正解！半分以上できたよ！', 'よくできました！7問正解！', '7問正解！もっと練習したら完璧になれるよ！'],
+    6:  ['6問正解！もう少し練習しよう！', 'いい感じ！間違えた問題を見てみよう！', '6問正解！また挑戦してみよう！'],
+  };
+  let comment;
+  if (comments[score]) {
+    comment = comments[score][Math.floor(Math.random() * comments[score].length)];
+  } else if (score <= 5) {
+    comment = '間違えた問題をよく読んで、また挑戦してみよう！きっとできるようになるよ！';
+  }
+  document.getElementById('resultComment').textContent = comment;
+
+  // Wrong list
+  const wl = document.getElementById('wrongList');
+  wl.innerHTML = '';
+  if (wrongQuestions.length > 0) {
+    wl.innerHTML = '<h3>間違えた問題（もう一度読んでみよう）</h3>';
+    wrongQuestions.forEach(q => {
+      const div = document.createElement('div');
+      div.className = 'wrong-item';
+      div.innerHTML = `<div>${q.text}</div><div class="correct-ans">正解：${q.answer}</div>`;
+      wl.appendChild(div);
+    });
+  }
+
+  showScreen('screenResult');
+}
+
+// ============================================================
+// ユーティリティ
+// ============================================================
+function shuffle(arr) {
+  for (let i = arr.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [arr[i], arr[j]] = [arr[j], arr[i]];
+  }
+  return arr;
+}
+
+function flashScreen(correct) {
+  const el = document.getElementById('flashOverlay');
+  el.className = `flash-overlay ${correct ? 'correct-flash' : 'wrong-flash'} show`;
+  setTimeout(() => { el.className = 'flash-overlay'; }, 250);
+}
+</script>
+</body>
+</html>
