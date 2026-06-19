@@ -321,23 +321,9 @@
     }
     .btn-secondary:hover { background: #f3e5f5; }
 
-    /* Flash overlay */
-    .flash-overlay {
-      position: fixed;
-      top: 0; left: 0; right: 0; bottom: 0;
-      pointer-events: none;
-      opacity: 0;
-      transition: opacity 0.15s;
-      z-index: 999;
-    }
-    .flash-overlay.correct-flash { background: rgba(100, 200, 100, 0.25); }
-    .flash-overlay.wrong-flash   { background: rgba(220, 80, 80, 0.2); }
-    .flash-overlay.show { opacity: 1; }
   </style>
 </head>
 <body>
-
-<div class="flash-overlay" id="flashOverlay"></div>
 
 <!-- タイトル画面 -->
 <div class="screen active card" id="screenTitle">
@@ -652,9 +638,6 @@ function selectAnswer(selected) {
     if (btn.textContent === selected && !isCorrect) btn.classList.add('wrong');
   });
 
-  // Flash
-  flashScreen(isCorrect);
-
   // Explain
   const panel = document.getElementById('explainPanel');
   panel.style.display = 'block';
@@ -745,11 +728,6 @@ function shuffle(arr) {
   return arr;
 }
 
-function flashScreen(correct) {
-  const el = document.getElementById('flashOverlay');
-  el.className = `flash-overlay ${correct ? 'correct-flash' : 'wrong-flash'} show`;
-  setTimeout(() => { el.className = 'flash-overlay'; }, 250);
-}
 </script>
 </body>
 </html>
