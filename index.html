@@ -7,7 +7,7 @@
   <link rel="icon" type="image/png" href="assets/favicon.png">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Yomogi&family=Hachi+Maru+Pop&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=M+PLUS+Rounded+1c:wght@500;700;800&display=swap" rel="stylesheet">
   <style>
     :root {
       --purple: #7c5cb0;
@@ -26,7 +26,7 @@
     * { box-sizing: border-box; margin: 0; padding: 0; }
 
     body {
-      font-family: 'Hachi Maru Pop', 'Hiragino Maru Gothic ProN', 'BIZ UDPGothic', sans-serif;
+      font-family: 'M PLUS Rounded 1c', 'Hiragino Maru Gothic ProN', 'BIZ UDPGothic', sans-serif;
       background-image: url('assets/bg-kraft-paper.png');
       background-size: 420px 420px;
       background-repeat: repeat;
@@ -72,7 +72,7 @@
     }
 
     h1 {
-      font-family: 'Yomogi', sans-serif;
+      font-family: 'M PLUS Rounded 1c', sans-serif;
       font-size: 1.85rem;
       color: var(--ink);
       text-align: center;
@@ -252,18 +252,27 @@
     }
 
     .answer-btn {
-      font-family: 'Yomogi', sans-serif;
-      padding: 20px 12px;
+      font-family: 'M PLUS Rounded 1c', sans-serif;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      padding: 18px 12px;
       border: 3px solid var(--purple-light);
       border-radius: 10px 16px 10px 16px;
       background: #fffdf6;
-      font-size: 1.25rem;
-      font-weight: bold;
+      font-size: 1.15rem;
+      font-weight: 700;
       color: var(--ink);
       cursor: pointer;
       transition: all 0.18s;
-      letter-spacing: 1px;
       box-shadow: 0 4px 0 var(--purple-light);
+    }
+    .answer-btn .op-symbol {
+      font-size: 1.5rem;
+      font-weight: 800;
+      color: var(--purple);
+      line-height: 1;
     }
     .answer-btn:hover:not(:disabled) {
       background: #fbf6e8;
@@ -339,7 +348,7 @@
       margin-bottom: 6px;
     }
     .explain-label {
-      font-family: 'Yomogi', sans-serif;
+      font-family: 'M PLUS Rounded 1c', sans-serif;
       font-size: 1.2rem;
       font-weight: bold;
     }
@@ -348,7 +357,7 @@
     .explain-text { color: #4a4a4a; font-size: 0.92rem; line-height: 1.6; }
 
     .next-btn {
-      font-family: 'Yomogi', sans-serif;
+      font-family: 'M PLUS Rounded 1c', sans-serif;
       display: block;
       width: 100%;
       margin-top: 14px;
@@ -419,7 +428,7 @@
 
     .result-buttons { display: flex; flex-direction: column; gap: 10px; }
     .btn-primary {
-      font-family: 'Yomogi', sans-serif;
+      font-family: 'M PLUS Rounded 1c', sans-serif;
       padding: 16px;
       background: linear-gradient(135deg, var(--purple), var(--pink));
       color: #fffdf6;
@@ -432,7 +441,7 @@
     }
     .btn-primary:active { transform: translateY(2px); box-shadow: 0 1px 0 var(--purple-dark); }
     .btn-secondary {
-      font-family: 'Yomogi', sans-serif;
+      font-family: 'M PLUS Rounded 1c', sans-serif;
       padding: 13px;
       background: #fffdf6;
       color: var(--purple);
@@ -694,6 +703,8 @@ let timerInterval = null;
 let elapsedMs = 0;
 let timerStarted = false;
 
+const OPERATION_SYMBOLS = { 'たし算': '＋', 'ひき算': 'ー', 'かけ算': '×', 'わり算': '÷' };
+
 const MASCOT_CORRECT = ['やったね！その通り！', 'すごい！正解だよ！', 'バッチリ！正解！'];
 const MASCOT_WRONG = ['おっと、ちがったよ。一緒に見てみよう！', 'うーん、もう一回考えてみよう！', '残念！でも理由を読めば次はわかるよ！'];
 
@@ -763,19 +774,17 @@ function showQuestion() {
   const btnArea = document.getElementById('answerButtons');
   btnArea.innerHTML = '';
 
-  let options;
-  if (currentMode === 2) {
-    options = ['かけ算', 'わり算'];
-  } else {
-    options = shuffle(['たし算', 'ひき算', 'かけ算', 'わり算']);
-  }
+  const options = currentMode === 2
+    ? ['かけ算', 'わり算']
+    : ['たし算', 'ひき算', 'かけ算', 'わり算'];
 
   btnArea.className = `answer-buttons ${currentMode === 2 ? 'mode2' : 'mode4'}`;
 
   options.forEach(opt => {
     const btn = document.createElement('button');
     btn.className = 'answer-btn';
-    btn.textContent = opt;
+    btn.dataset.value = opt;
+    btn.innerHTML = `<span class="op-label">${opt}</span><span class="op-symbol">${OPERATION_SYMBOLS[opt]}</span>`;
     btn.onclick = () => selectAnswer(opt);
     btnArea.appendChild(btn);
   });
@@ -805,8 +814,8 @@ function selectAnswer(selected) {
   // Disable all buttons
   document.querySelectorAll('.answer-btn').forEach(btn => {
     btn.disabled = true;
-    if (btn.textContent === q.answer) btn.classList.add('correct');
-    if (btn.textContent === selected && !isCorrect) btn.classList.add('wrong');
+    if (btn.dataset.value === q.answer) btn.classList.add('correct');
+    if (btn.dataset.value === selected && !isCorrect) btn.classList.add('wrong');
   });
 
   // Explain
