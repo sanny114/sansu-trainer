@@ -188,6 +188,21 @@
     .stage-difficulty { display: flex; gap: 2px; }
     .star-icon-sm { width: 18px; height: 18px; }
 
+    .home-btn {
+      font-family: 'M PLUS Rounded 1c', sans-serif;
+      display: block;
+      margin: 0 0 12px auto;
+      padding: 6px 14px;
+      background: #fffdf6;
+      color: var(--purple);
+      border: 2px dashed var(--purple-light);
+      border-radius: 6px 14px 6px 14px;
+      font-size: 0.8rem;
+      font-weight: 700;
+      cursor: pointer;
+    }
+    .home-btn:hover { background: #fbf6e8; }
+
     /* Progress bar */
     .progress-wrap {
       margin-bottom: 16px;
@@ -507,6 +522,7 @@
 
 <!-- 問題画面 -->
 <div class="screen card" id="screenQuestion">
+  <button class="home-btn" onclick="confirmGoHome()">🏠 もどる</button>
   <div class="progress-wrap">
     <div class="progress-info">
       <span id="progressText">1 / 10</span>
@@ -719,6 +735,12 @@ function showScreen(id) {
 function showTitle() {
   clearInterval(timerInterval);
   showScreen('screenTitle');
+}
+
+function confirmGoHome() {
+  if (confirm('今のミッションをやめて、ホームにもどりますか？')) {
+    showTitle();
+  }
 }
 
 // ============================================================
