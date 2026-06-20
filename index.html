@@ -5,11 +5,24 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>算数トレーニング - どの計算かな？</title>
   <style>
+    :root {
+      --purple: #7c3aed;
+      --purple-dark: #5b21b6;
+      --purple-light: #a78bfa;
+      --pink: #ec4899;
+      --pink-light: #f9a8d4;
+      --mint: #10b981;
+      --mint-light: #6ee7b7;
+      --mint-bg: #ecfdf5;
+      --orange: #f97316;
+      --orange-light: #fdba74;
+      --orange-bg: #fff7ed;
+    }
     * { box-sizing: border-box; margin: 0; padding: 0; }
 
     body {
       font-family: 'Hiragino Maru Gothic ProN', 'BIZ UDPGothic', sans-serif;
-      background: linear-gradient(135deg, #fce4ec 0%, #f8bbd9 30%, #e1bee7 60%, #d1c4e9 100%);
+      background: linear-gradient(135deg, #ede9fe 0%, #f3e8ff 35%, #fce7f3 70%, #fdf2f8 100%);
       min-height: 100vh;
       display: flex;
       align-items: center;
@@ -31,80 +44,148 @@
     }
 
     .card {
-      background: rgba(255,255,255,0.92);
+      background: rgba(255,255,255,0.95);
       border-radius: 28px;
       padding: 32px 28px;
-      box-shadow: 0 8px 32px rgba(180,100,200,0.18);
+      box-shadow: 0 10px 36px rgba(124,58,237,0.16);
     }
 
     h1 {
-      font-size: 2rem;
-      color: #8e4eaa;
+      font-size: 1.9rem;
+      color: var(--purple-dark);
       text-align: center;
-      margin-bottom: 8px;
-      letter-spacing: 2px;
+      letter-spacing: 1px;
     }
 
     .subtitle {
       text-align: center;
-      color: #b06ac0;
-      font-size: 1rem;
-      margin-bottom: 28px;
+      color: var(--pink);
+      font-size: 0.95rem;
+      font-weight: bold;
+      margin-bottom: 8px;
     }
 
-    .mode-cards {
+    /* マスコット吹き出し */
+    .mascot-row {
+      display: flex;
+      align-items: flex-end;
+      gap: 10px;
+      margin: 18px 0 22px;
+    }
+    .mascot-emoji {
+      font-size: 2.4rem;
+      flex-shrink: 0;
+      animation: bob 2.2s ease-in-out infinite;
+    }
+    @keyframes bob {
+      0%, 100% { transform: translateY(0) rotate(0deg); }
+      50%      { transform: translateY(-4px) rotate(-3deg); }
+    }
+    .mascot-bubble {
+      position: relative;
+      background: #f5f3ff;
+      border: 2px solid var(--purple-light);
+      border-radius: 16px;
+      padding: 10px 16px;
+      font-size: 0.92rem;
+      color: var(--purple-dark);
+      font-weight: bold;
+      flex: 1;
+    }
+    .mascot-bubble::before {
+      content: '';
+      position: absolute;
+      left: -8px;
+      bottom: 12px;
+      border: 7px solid transparent;
+      border-right-color: var(--purple-light);
+    }
+
+    /* ステージカード（ミッション選択） */
+    .stage-cards {
       display: flex;
       flex-direction: column;
       gap: 16px;
     }
 
-    .mode-card {
-      background: linear-gradient(135deg, #f3e5f5, #fce4ec);
-      border: 3px solid #ce93d8;
-      border-radius: 20px;
-      padding: 22px 24px;
+    .stage-card {
+      position: relative;
+      background: linear-gradient(135deg, #f5f3ff, #fdf2f8);
+      border: 3px solid var(--purple-light);
+      border-radius: 22px;
+      padding: 20px 22px;
       cursor: pointer;
       transition: all 0.2s;
-      text-align: center;
     }
-    .mode-card:hover, .mode-card:active {
-      background: linear-gradient(135deg, #ce93d8, #f48fb1);
-      border-color: #ab47bc;
+    .stage-card:hover, .stage-card:active {
+      background: linear-gradient(135deg, var(--purple-light), var(--pink-light));
+      border-color: var(--purple);
       transform: scale(1.02);
     }
-    .mode-card h2 { color: #6a1b9a; font-size: 1.4rem; margin-bottom: 6px; }
-    .mode-card p { color: #8e24aa; font-size: 0.92rem; }
+    .stage-card-top {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 6px;
+    }
+    .stage-card h2 { color: var(--purple-dark); font-size: 1.25rem; }
+    .stage-card p { color: #7e22ce; font-size: 0.88rem; margin-top: 4px; }
 
-    .mode-badge {
+    .stage-badge {
       display: inline-block;
-      background: #ab47bc;
+      background: var(--purple);
       color: white;
       border-radius: 20px;
-      padding: 2px 14px;
-      font-size: 0.8rem;
-      margin-bottom: 10px;
+      padding: 3px 14px;
+      font-size: 0.75rem;
+      font-weight: bold;
+    }
+    .stage-difficulty { font-size: 0.95rem; letter-spacing: 1px; color: var(--orange); }
+
+    .badge-row {
+      display: flex;
+      gap: 6px;
+      margin-top: 10px;
+      flex-wrap: wrap;
+    }
+    .badge-chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      background: white;
+      border: 1.5px solid var(--purple-light);
+      border-radius: 14px;
+      padding: 3px 10px;
+      font-size: 0.72rem;
+      color: var(--purple-dark);
+      font-weight: bold;
+    }
+    .badge-chip.locked {
+      opacity: 0.4;
+      border-color: #ccc;
+      color: #888;
     }
 
     /* Progress bar */
     .progress-wrap {
-      margin-bottom: 20px;
+      margin-bottom: 16px;
     }
     .progress-info {
       display: flex;
       justify-content: space-between;
-      color: #8e4eaa;
-      font-size: 0.9rem;
+      color: var(--purple);
+      font-size: 0.88rem;
       margin-bottom: 6px;
       font-weight: bold;
     }
     .progress-bar {
-      background: #e1bee7;
+      background: #ede9fe;
       border-radius: 10px;
       height: 12px;
       overflow: hidden;
     }
     .progress-fill {
-      background: linear-gradient(90deg, #ce93d8, #f48fb1);
+      background: linear-gradient(90deg, var(--purple), var(--pink));
       height: 100%;
       border-radius: 10px;
       transition: width 0.4s ease;
@@ -113,80 +194,77 @@
     /* Trick banner */
     .trick-banner {
       display: none;
-      background: linear-gradient(135deg, #ff8f00, #ffca28);
+      background: linear-gradient(135deg, var(--orange), #fb923c);
       color: white;
       text-align: center;
       border-radius: 16px;
       padding: 12px 20px;
-      font-size: 1.05rem;
+      font-size: 1.02rem;
       font-weight: bold;
       margin-bottom: 16px;
       animation: pulse 1s ease infinite alternate;
     }
     @keyframes pulse {
-      from { box-shadow: 0 0 0 rgba(255,143,0,0.4); }
-      to   { box-shadow: 0 0 16px rgba(255,143,0,0.6); }
+      from { box-shadow: 0 0 0 rgba(249,115,22,0.4); }
+      to   { box-shadow: 0 0 16px rgba(249,115,22,0.6); }
     }
 
     /* Question */
-    .question-num {
-      font-size: 0.85rem;
-      color: #ab47bc;
-      margin-bottom: 8px;
-    }
     .question-text {
-      background: #f3e5f5;
-      border-left: 5px solid #ce93d8;
-      border-radius: 0 16px 16px 0;
-      padding: 18px 20px;
-      font-size: 1.15rem;
+      font-size: 1.1rem;
       line-height: 1.7;
-      color: #3a003f;
-      margin-bottom: 24px;
+      color: #3b0764;
+      font-weight: bold;
     }
 
     /* Answer buttons */
     .answer-buttons {
       display: grid;
+      grid-template-columns: 1fr 1fr;
       gap: 12px;
+      margin-top: 22px;
     }
-    .answer-buttons.mode2 { grid-template-columns: 1fr 1fr; }
-    .answer-buttons.mode4 { grid-template-columns: 1fr 1fr; }
 
     .answer-btn {
-      padding: 18px 12px;
-      border: 3px solid #ce93d8;
+      padding: 20px 12px;
+      border: 3px solid var(--purple-light);
       border-radius: 18px;
       background: white;
       font-size: 1.2rem;
       font-weight: bold;
-      color: #6a1b9a;
+      color: var(--purple-dark);
       cursor: pointer;
       transition: all 0.18s;
       letter-spacing: 1px;
+      box-shadow: 0 4px 0 var(--purple-light);
     }
     .answer-btn:hover:not(:disabled) {
-      background: linear-gradient(135deg, #f3e5f5, #fce4ec);
-      border-color: #ab47bc;
-      transform: scale(1.04);
+      background: linear-gradient(135deg, #f5f3ff, #fdf2f8);
+      transform: translateY(-2px);
+    }
+    .answer-btn:active:not(:disabled) {
+      transform: translateY(2px);
+      box-shadow: 0 1px 0 var(--purple-light);
     }
     .answer-btn.correct {
-      background: linear-gradient(135deg, #a5d6a7, #c8e6c9);
-      border-color: #43a047;
-      color: #1b5e20;
+      background: linear-gradient(135deg, var(--mint-light), #a7f3d0);
+      border-color: var(--mint);
+      color: #065f46;
+      box-shadow: 0 4px 0 var(--mint);
       animation: popIn 0.3s ease;
     }
     .answer-btn.wrong {
-      background: linear-gradient(135deg, #ef9a9a, #ffcdd2);
-      border-color: #e53935;
-      color: #b71c1c;
+      background: linear-gradient(135deg, var(--orange-light), #fed7aa);
+      border-color: var(--orange);
+      color: #9a3412;
+      box-shadow: 0 4px 0 var(--orange);
       animation: shake 0.4s ease;
     }
     .answer-btn:disabled { cursor: default; }
 
     @keyframes popIn {
       0%   { transform: scale(1); }
-      50%  { transform: scale(1.1); }
+      50%  { transform: scale(1.08); }
       100% { transform: scale(1); }
     }
     @keyframes shake {
@@ -199,146 +277,168 @@
     .explain-panel {
       display: none;
       margin-top: 20px;
-      border-radius: 16px;
-      padding: 18px 20px;
+      border-radius: 18px;
+      padding: 16px 18px;
       animation: fadeIn 0.3s ease;
     }
     .explain-panel.correct-panel {
-      background: #e8f5e9;
-      border: 2px solid #66bb6a;
+      background: var(--mint-bg);
+      border: 2px solid var(--mint);
     }
     .explain-panel.wrong-panel {
-      background: #fff8e1;
-      border: 2px solid #ffa726;
+      background: var(--orange-bg);
+      border: 2px solid var(--orange);
+    }
+    .explain-head {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 6px;
     }
     .explain-label {
-      font-size: 1.3rem;
+      font-size: 1.2rem;
       font-weight: bold;
-      margin-bottom: 8px;
     }
-    .explain-panel.correct-panel .explain-label { color: #2e7d32; }
-    .explain-panel.wrong-panel .explain-label { color: #e65100; }
-    .explain-text { color: #4a4a4a; font-size: 0.95rem; line-height: 1.6; }
+    .explain-panel.correct-panel .explain-label { color: #047857; }
+    .explain-panel.wrong-panel .explain-label { color: #c2410c; }
+    .explain-text { color: #4a4a4a; font-size: 0.92rem; line-height: 1.6; }
 
     .next-btn {
       display: block;
       width: 100%;
       margin-top: 14px;
-      padding: 14px;
-      background: linear-gradient(135deg, #ce93d8, #f48fb1);
+      padding: 15px;
+      background: linear-gradient(135deg, var(--purple), var(--pink));
       color: white;
       border: none;
       border-radius: 18px;
-      font-size: 1.1rem;
+      font-size: 1.05rem;
       font-weight: bold;
       cursor: pointer;
       transition: all 0.18s;
+      box-shadow: 0 4px 0 var(--purple-dark);
     }
-    .next-btn:hover { opacity: 0.88; transform: scale(1.02); }
+    .next-btn:hover { transform: translateY(-1px); }
+    .next-btn:active { transform: translateY(2px); box-shadow: 0 1px 0 var(--purple-dark); }
 
     /* Timer */
-    .timer-display {
-      text-align: center;
-      color: #8e4eaa;
-      font-size: 0.9rem;
-      margin-bottom: 16px;
-    }
-    .timer-num { font-size: 1.3rem; font-weight: bold; }
+    .timer-num { font-size: 1.1rem; font-weight: bold; }
 
     /* Result screen */
     .result-title {
       text-align: center;
-      font-size: 1.8rem;
-      color: #6a1b9a;
+      font-size: 1.7rem;
+      color: var(--purple-dark);
       margin-bottom: 4px;
     }
     .stars {
       text-align: center;
-      font-size: 2.4rem;
-      margin: 12px 0;
+      font-size: 2.2rem;
+      margin: 10px 0;
+      color: var(--mint);
     }
-    .result-comment {
-      text-align: center;
-      font-size: 1.05rem;
-      color: #8e4eaa;
-      margin-bottom: 20px;
-      font-weight: bold;
-    }
+    .result-comment { text-align: center; }
     .result-stats {
       display: flex;
       justify-content: center;
-      gap: 28px;
-      margin-bottom: 24px;
+      gap: 20px;
+      margin: 18px 0 20px;
     }
     .stat-box {
-      background: #f3e5f5;
+      background: #f5f3ff;
       border-radius: 16px;
-      padding: 14px 22px;
+      padding: 14px 20px;
+      text-align: center;
+      min-width: 84px;
+    }
+    .stat-num { font-size: 1.9rem; font-weight: bold; color: var(--purple-dark); }
+    .stat-label { font-size: 0.78rem; color: var(--pink); font-weight: bold; }
+
+    .new-badges {
+      display: none;
+      background: linear-gradient(135deg, #fef9c3, #fde68a);
+      border: 2px solid #facc15;
+      border-radius: 16px;
+      padding: 14px 16px;
+      margin-bottom: 18px;
       text-align: center;
     }
-    .stat-num { font-size: 2rem; font-weight: bold; color: #6a1b9a; }
-    .stat-label { font-size: 0.82rem; color: #ab47bc; }
+    .new-badges h3 { color: #92400e; font-size: 0.95rem; margin-bottom: 8px; }
+    .new-badges .badge-row { justify-content: center; }
+    .new-badges .badge-chip { border-color: #facc15; background: white; }
 
     .wrong-list { margin-bottom: 20px; }
-    .wrong-list h3 { color: #6a1b9a; font-size: 1rem; margin-bottom: 10px; }
+    .wrong-list h3 { color: var(--purple-dark); font-size: 0.95rem; margin-bottom: 10px; }
     .wrong-item {
-      background: #fff8e1;
-      border-left: 4px solid #ffa726;
+      background: var(--orange-bg);
+      border-left: 4px solid var(--orange);
       border-radius: 0 12px 12px 0;
       padding: 10px 14px;
       margin-bottom: 8px;
-      font-size: 0.9rem;
+      font-size: 0.88rem;
     }
     .wrong-item .correct-ans {
       font-weight: bold;
-      color: #e65100;
+      color: #c2410c;
       margin-top: 4px;
     }
 
     .result-buttons { display: flex; flex-direction: column; gap: 10px; }
     .btn-primary {
       padding: 16px;
-      background: linear-gradient(135deg, #ce93d8, #f48fb1);
+      background: linear-gradient(135deg, var(--purple), var(--pink));
       color: white;
       border: none;
       border-radius: 18px;
-      font-size: 1.1rem;
+      font-size: 1.05rem;
       font-weight: bold;
       cursor: pointer;
-      transition: all 0.18s;
+      box-shadow: 0 4px 0 var(--purple-dark);
     }
-    .btn-primary:hover { opacity: 0.88; transform: scale(1.02); }
+    .btn-primary:active { transform: translateY(2px); box-shadow: 0 1px 0 var(--purple-dark); }
     .btn-secondary {
-      padding: 14px;
+      padding: 13px;
       background: white;
-      color: #ab47bc;
-      border: 2.5px solid #ce93d8;
+      color: var(--purple);
+      border: 2.5px solid var(--purple-light);
       border-radius: 18px;
-      font-size: 1rem;
+      font-size: 0.95rem;
       font-weight: bold;
       cursor: pointer;
-      transition: all 0.18s;
     }
-    .btn-secondary:hover { background: #f3e5f5; }
-
+    .btn-secondary:hover { background: #f5f3ff; }
   </style>
 </head>
 <body>
 
-<!-- タイトル画面 -->
+<!-- ミッション選択画面 -->
 <div class="screen active card" id="screenTitle">
-  <h1>算数トレーニング</h1>
-  <p class="subtitle">どの計算かな？ぱぱっと選ぼう！</p>
-  <div class="mode-cards">
-    <div class="mode-card" onclick="startGame(2)">
-      <span class="mode-badge">まずはここから</span>
-      <h2>かけ算 or わり算モード</h2>
-      <p>2つから選ぶ！かけ算とわり算をマスターしよう</p>
+  <h1>どの計算？算数ミッション</h1>
+  <p class="subtitle">文章題を読んで、つかう計算を当てよう！</p>
+
+  <div class="mascot-row">
+    <span class="mascot-emoji">🦉</span>
+    <div class="mascot-bubble" id="titleMascotText">どっちのミッションにチャレンジする？</div>
+  </div>
+
+  <div class="stage-cards">
+    <div class="stage-card" onclick="startGame(2)">
+      <div class="stage-card-top">
+        <span class="stage-badge">ミッション1</span>
+        <span class="stage-difficulty">★☆☆</span>
+      </div>
+      <h2>かけ算・わり算ミッション</h2>
+      <p>2つから選ぶ！まずはここからマスターしよう</p>
+      <div class="badge-row" id="badgeRowMode2"></div>
     </div>
-    <div class="mode-card" onclick="startGame(4)">
-      <span class="mode-badge">チャレンジ</span>
-      <h2>4つから選ぶモード</h2>
-      <p>たし算・ひき算・かけ算・わり算、ぜんぶから選ぶ上級モード</p>
+    <div class="stage-card" onclick="startGame(4)">
+      <div class="stage-card-top">
+        <span class="stage-badge">ミッション2</span>
+        <span class="stage-difficulty">★★★</span>
+      </div>
+      <h2>全部わかるかな？ミッション</h2>
+      <p>たし算・ひき算・かけ算・わり算、ぜんぶから選ぶ上級ミッション</p>
+      <div class="badge-row" id="badgeRowMode4"></div>
     </div>
   </div>
 </div>
@@ -355,12 +455,18 @@
 
   <div class="trick-banner" id="trickBanner">⚡ ひっかけ問題だよ！気をつけて！⚡</div>
 
-  <div class="question-text" id="questionText">問題文</div>
+  <div class="mascot-row">
+    <span class="mascot-emoji">🦉</span>
+    <div class="mascot-bubble question-text" id="questionText">問題文</div>
+  </div>
 
   <div class="answer-buttons mode2" id="answerButtons"></div>
 
   <div class="explain-panel" id="explainPanel">
-    <div class="explain-label" id="explainLabel"></div>
+    <div class="explain-head">
+      <span id="explainEmoji" style="font-size:1.6rem;">🦉</span>
+      <span class="explain-label" id="explainLabel"></span>
+    </div>
     <div class="explain-text" id="explainText"></div>
     <button class="next-btn" id="nextBtn" onclick="nextQuestion()">次へ →</button>
   </div>
@@ -370,7 +476,10 @@
 <div class="screen card" id="screenResult">
   <div class="result-title">結果発表！</div>
   <div class="stars" id="resultStars">★★★</div>
-  <div class="result-comment" id="resultComment"></div>
+  <div class="mascot-row">
+    <span class="mascot-emoji">🦉</span>
+    <div class="mascot-bubble result-comment" id="resultComment"></div>
+  </div>
   <div class="result-stats">
     <div class="stat-box">
       <div class="stat-num" id="resultScore">0</div>
@@ -380,6 +489,10 @@
       <div class="stat-num" id="resultTime">0</div>
       <div class="stat-label">秒</div>
     </div>
+  </div>
+  <div class="new-badges" id="newBadges">
+    <h3>🎉 新しいバッジをかくとく！</h3>
+    <div class="badge-row" id="newBadgeRow"></div>
   </div>
   <div class="wrong-list" id="wrongList"></div>
   <div class="result-buttons">
@@ -516,6 +629,39 @@ const trickProblems = [
 ];
 
 // ============================================================
+// バッジ定義
+// ============================================================
+const ALL_BADGES = {
+  missionClear: { emoji: '🎖️', label: 'ミッションクリア', desc: '6問以上正解する' },
+  perfect:      { emoji: '🏆', label: 'パーフェクト名人', desc: '10問全問正解する' },
+  trickMaster:  { emoji: '🎯', label: 'ひっかけ攻略',     desc: 'ひっかけ問題に正解する' },
+  speedy:       { emoji: '⚡', label: 'スピード博士',     desc: '60秒以内にクリアする' },
+};
+const BADGE_ORDER = ['missionClear', 'perfect', 'trickMaster', 'speedy'];
+
+function loadBadges() {
+  try {
+    const raw = JSON.parse(localStorage.getItem('sansuTrainerBadges') || '{}');
+    return { mode2: raw.mode2 || [], mode4: raw.mode4 || [] };
+  } catch (e) {
+    return { mode2: [], mode4: [] };
+  }
+}
+function saveBadges(badges) {
+  localStorage.setItem('sansuTrainerBadges', JSON.stringify(badges));
+}
+function renderBadgeRow(containerId, mode) {
+  const badges = loadBadges();
+  const earned = mode === 2 ? badges.mode2 : badges.mode4;
+  const el = document.getElementById(containerId);
+  el.innerHTML = BADGE_ORDER.map(key => {
+    const b = ALL_BADGES[key];
+    const got = earned.includes(key);
+    return `<span class="badge-chip${got ? '' : ' locked'}" title="${b.desc}">${got ? b.emoji : '🔒'} ${b.label}</span>`;
+  }).join('');
+}
+
+// ============================================================
 // ゲーム状態
 // ============================================================
 let currentMode = 2;
@@ -523,9 +669,13 @@ let selectedQuestions = [];
 let currentIndex = 0;
 let score = 0;
 let wrongQuestions = [];
+let trickAnsweredCorrect = false;
 let timerInterval = null;
 let elapsedMs = 0;
 let timerStarted = false;
+
+const MASCOT_CORRECT = ['やったね！その通り！', 'すごい！正解だよ！', 'バッチリ！正解！'];
+const MASCOT_WRONG = ['おっと、ちがったよ。一緒に見てみよう！', 'うーん、もう一回考えてみよう！', '残念！でも理由を読めば次はわかるよ！'];
 
 // ============================================================
 // 画面切り替え
@@ -537,6 +687,8 @@ function showScreen(id) {
 
 function showTitle() {
   clearInterval(timerInterval);
+  renderBadgeRow('badgeRowMode2', 2);
+  renderBadgeRow('badgeRowMode4', 4);
   showScreen('screenTitle');
 }
 
@@ -550,6 +702,7 @@ function startGame(mode) {
   currentIndex = 0;
   elapsedMs = 0;
   timerStarted = false;
+  trickAnsweredCorrect = false;
   clearInterval(timerInterval);
 
   const pool = mode === 2
@@ -642,12 +795,16 @@ function selectAnswer(selected) {
   const panel = document.getElementById('explainPanel');
   panel.style.display = 'block';
   panel.className = isCorrect ? 'explain-panel correct-panel' : 'explain-panel wrong-panel';
-  document.getElementById('explainLabel').textContent = isCorrect ? '正解！' : '不正解…';
+  document.getElementById('explainEmoji').textContent = isCorrect ? '🦉' : '🦉';
+  document.getElementById('explainLabel').textContent = isCorrect
+    ? MASCOT_CORRECT[Math.floor(Math.random() * MASCOT_CORRECT.length)]
+    : MASCOT_WRONG[Math.floor(Math.random() * MASCOT_WRONG.length)];
   document.getElementById('explainText').textContent = isCorrect ? q.shortExplain : q.longExplain;
 
   // Score
   if (isCorrect) {
     score++;
+    if (q.isTrick) trickAnsweredCorrect = true;
   } else {
     wrongQuestions.push(q);
   }
@@ -673,6 +830,22 @@ function nextQuestion() {
 // ============================================================
 // 結果画面
 // ============================================================
+function checkNewBadges() {
+  const earned = [];
+  if (score >= 6) earned.push('missionClear');
+  if (score === 10) earned.push('perfect');
+  if (trickAnsweredCorrect) earned.push('trickMaster');
+  if (elapsedMs <= 60000) earned.push('speedy');
+
+  const badges = loadBadges();
+  const key = currentMode === 2 ? 'mode2' : 'mode4';
+  const already = badges[key];
+  const newOnes = earned.filter(b => !already.includes(b));
+  badges[key] = [...already, ...newOnes];
+  saveBadges(badges);
+  return newOnes;
+}
+
 function showResult() {
   const secs = (elapsedMs / 1000).toFixed(1);
 
@@ -696,20 +869,33 @@ function showResult() {
   let comment;
   if (comments[score]) {
     comment = comments[score][Math.floor(Math.random() * comments[score].length)];
-  } else if (score <= 5) {
+  } else {
     comment = '間違えた問題をよく読んで、また挑戦してみよう！きっとできるようになるよ！';
   }
   document.getElementById('resultComment').textContent = comment;
 
-  // Wrong list
+  // New badges
+  const newOnes = checkNewBadges();
+  const newBadgesEl = document.getElementById('newBadges');
+  if (newOnes.length > 0) {
+    newBadgesEl.style.display = 'block';
+    document.getElementById('newBadgeRow').innerHTML = newOnes.map(key => {
+      const b = ALL_BADGES[key];
+      return `<span class="badge-chip">${b.emoji} ${b.label}</span>`;
+    }).join('');
+  } else {
+    newBadgesEl.style.display = 'none';
+  }
+
+  // Wrong list (攻略ポイント)
   const wl = document.getElementById('wrongList');
   wl.innerHTML = '';
   if (wrongQuestions.length > 0) {
-    wl.innerHTML = '<h3>間違えた問題（もう一度読んでみよう）</h3>';
+    wl.innerHTML = '<h3>攻略ポイント（間違えた問題をもう一度読んでみよう）</h3>';
     wrongQuestions.forEach(q => {
       const div = document.createElement('div');
       div.className = 'wrong-item';
-      div.innerHTML = `<div>${q.text}</div><div class="correct-ans">正解：${q.answer}</div>`;
+      div.innerHTML = `<div>${q.text}</div><div class="correct-ans">正解：${q.answer}</div><div>${q.longExplain}</div>`;
       wl.appendChild(div);
     });
   }
@@ -727,6 +913,9 @@ function shuffle(arr) {
   }
   return arr;
 }
+
+renderBadgeRow('badgeRowMode2', 2);
+renderBadgeRow('badgeRowMode4', 4);
 
 </script>
 </body>
