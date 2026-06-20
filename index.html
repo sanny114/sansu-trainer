@@ -4,6 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>算数トレーニング - どの計算かな？</title>
+  <link rel="icon" type="image/png" href="assets/favicon.png">
   <style>
     :root {
       --purple: #7c3aed;
@@ -72,10 +73,17 @@
       gap: 10px;
       margin: 18px 0 22px;
     }
-    .mascot-emoji {
-      font-size: 2.4rem;
+    .mascot-img {
+      width: 56px;
+      height: 56px;
       flex-shrink: 0;
+      object-fit: contain;
       animation: bob 2.2s ease-in-out infinite;
+    }
+    .explain-head .mascot-img-sm {
+      width: 32px;
+      height: 32px;
+      object-fit: contain;
     }
     @keyframes bob {
       0%, 100% { transform: translateY(0) rotate(0deg); }
@@ -128,6 +136,17 @@
       justify-content: space-between;
       margin-bottom: 6px;
     }
+    .stage-card-body {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+    .stage-icon {
+      width: 56px;
+      height: 56px;
+      flex-shrink: 0;
+      object-fit: contain;
+    }
     .stage-card h2 { color: var(--purple-dark); font-size: 1.25rem; }
     .stage-card p { color: #7e22ce; font-size: 0.88rem; margin-top: 4px; }
 
@@ -140,7 +159,8 @@
       font-size: 0.75rem;
       font-weight: bold;
     }
-    .stage-difficulty { font-size: 0.95rem; letter-spacing: 1px; color: var(--orange); }
+    .stage-difficulty { display: flex; gap: 2px; }
+    .star-icon-sm { width: 18px; height: 18px; }
 
     /* Progress bar */
     .progress-wrap {
@@ -170,16 +190,20 @@
     /* Trick banner */
     .trick-banner {
       display: none;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
       background: linear-gradient(135deg, var(--orange), #fb923c);
       color: white;
       text-align: center;
       border-radius: 16px;
-      padding: 12px 20px;
+      padding: 10px 20px;
       font-size: 1.02rem;
       font-weight: bold;
       margin-bottom: 16px;
       animation: pulse 1s ease infinite alternate;
     }
+    .trick-banner img { width: 32px; height: 32px; flex-shrink: 0; }
     @keyframes pulse {
       from { box-shadow: 0 0 0 rgba(249,115,22,0.4); }
       to   { box-shadow: 0 0 16px rgba(249,115,22,0.6); }
@@ -308,11 +332,12 @@
       margin-bottom: 4px;
     }
     .stars {
-      text-align: center;
-      font-size: 2.2rem;
+      display: flex;
+      justify-content: center;
+      gap: 8px;
       margin: 10px 0;
-      color: var(--mint);
     }
+    .star-icon { width: 44px; height: 44px; }
     .result-comment { text-align: center; }
     .result-stats {
       display: flex;
@@ -380,7 +405,7 @@
   <p class="subtitle">文章題を読んで、つかう計算を当てよう！</p>
 
   <div class="mascot-row">
-    <span class="mascot-emoji">🦉</span>
+    <img class="mascot-img" src="assets/mascot-normal.png" alt="ハカセ">
     <div class="mascot-bubble" id="titleMascotText">どっちのミッションにチャレンジする？</div>
   </div>
 
@@ -388,18 +413,36 @@
     <div class="stage-card" onclick="startGame(2)">
       <div class="stage-card-top">
         <span class="stage-badge">ミッション1</span>
-        <span class="stage-difficulty">★☆☆</span>
+        <span class="stage-difficulty">
+          <img class="star-icon-sm" src="assets/star-filled.png" alt="★">
+          <img class="star-icon-sm" src="assets/star-empty.png" alt="☆">
+          <img class="star-icon-sm" src="assets/star-empty.png" alt="☆">
+        </span>
       </div>
-      <h2>かけ算・わり算ミッション</h2>
-      <p>2つから選ぶ！まずはここからマスターしよう</p>
+      <div class="stage-card-body">
+        <img class="stage-icon" src="assets/mission-1-multiply-divide.png" alt="">
+        <div>
+          <h2>かけ算・わり算ミッション</h2>
+          <p>2つから選ぶ！まずはここからマスターしよう</p>
+        </div>
+      </div>
     </div>
     <div class="stage-card" onclick="startGame(4)">
       <div class="stage-card-top">
         <span class="stage-badge">ミッション2</span>
-        <span class="stage-difficulty">★★★</span>
+        <span class="stage-difficulty">
+          <img class="star-icon-sm" src="assets/star-filled.png" alt="★">
+          <img class="star-icon-sm" src="assets/star-filled.png" alt="★">
+          <img class="star-icon-sm" src="assets/star-filled.png" alt="★">
+        </span>
       </div>
-      <h2>全部わかるかな？ミッション</h2>
-      <p>たし算・ひき算・かけ算・わり算、ぜんぶから選ぶ上級ミッション</p>
+      <div class="stage-card-body">
+        <img class="stage-icon" src="assets/mission-2-four-operations.png" alt="">
+        <div>
+          <h2>全部わかるかな？ミッション</h2>
+          <p>たし算・ひき算・かけ算・わり算、ぜんぶから選ぶ上級ミッション</p>
+        </div>
+      </div>
     </div>
   </div>
 </div>
@@ -414,10 +457,10 @@
     <div class="progress-bar"><div class="progress-fill" id="progressFill" style="width:10%"></div></div>
   </div>
 
-  <div class="trick-banner" id="trickBanner">⚡ ひっかけ問題だよ！気をつけて！⚡</div>
+  <div class="trick-banner" id="trickBanner"><img src="assets/trick-alert.png" alt=""><span>ひっかけ問題だよ！気をつけて！</span><img src="assets/trick-alert.png" alt=""></div>
 
   <div class="mascot-row">
-    <span class="mascot-emoji">🦉</span>
+    <img class="mascot-img" src="assets/mascot-normal.png" alt="ハカセ" id="questionMascotImg">
     <div class="mascot-bubble question-text" id="questionText">問題文</div>
   </div>
 
@@ -425,7 +468,7 @@
 
   <div class="explain-panel" id="explainPanel">
     <div class="explain-head">
-      <span id="explainEmoji" style="font-size:1.6rem;">🦉</span>
+      <img class="mascot-img-sm" id="explainMascotImg" src="assets/mascot-happy.png" alt="ハカセ">
       <span class="explain-label" id="explainLabel"></span>
     </div>
     <div class="explain-text" id="explainText"></div>
@@ -436,9 +479,13 @@
 <!-- 結果画面 -->
 <div class="screen card" id="screenResult">
   <div class="result-title">結果発表！</div>
-  <div class="stars" id="resultStars">★★★</div>
+  <div class="stars">
+    <img class="star-icon" id="star1" src="assets/star-filled.png" alt="★">
+    <img class="star-icon" id="star2" src="assets/star-filled.png" alt="★">
+    <img class="star-icon" id="star3" src="assets/star-filled.png" alt="★">
+  </div>
   <div class="mascot-row">
-    <span class="mascot-emoji">🦉</span>
+    <img class="mascot-img" src="assets/mascot-happy.png" alt="ハカセ" id="resultMascotImg">
     <div class="mascot-bubble result-comment" id="resultComment"></div>
   </div>
   <div class="result-stats">
@@ -656,7 +703,8 @@ function showQuestion() {
 
   // Trick banner (10問目 = index 9)
   const banner = document.getElementById('trickBanner');
-  banner.style.display = q.isTrick ? 'block' : 'none';
+  banner.style.display = q.isTrick ? 'flex' : 'none';
+  document.getElementById('questionMascotImg').src = q.isTrick ? 'assets/mascot-surprised.png' : 'assets/mascot-normal.png';
 
   // Question text
   document.getElementById('questionText').textContent = q.text;
@@ -715,7 +763,7 @@ function selectAnswer(selected) {
   const panel = document.getElementById('explainPanel');
   panel.style.display = 'block';
   panel.className = isCorrect ? 'explain-panel correct-panel' : 'explain-panel wrong-panel';
-  document.getElementById('explainEmoji').textContent = isCorrect ? '🦉' : '🦉';
+  document.getElementById('explainMascotImg').src = isCorrect ? 'assets/mascot-happy.png' : 'assets/mascot-sad.png';
   document.getElementById('explainLabel').textContent = isCorrect
     ? MASCOT_CORRECT[Math.floor(Math.random() * MASCOT_CORRECT.length)]
     : MASCOT_WRONG[Math.floor(Math.random() * MASCOT_WRONG.length)];
@@ -756,10 +804,16 @@ function showResult() {
   document.getElementById('resultTime').textContent = secs;
 
   // Stars
-  let stars = '★★★';
-  if (score <= 5) stars = '★☆☆';
-  else if (score <= 7) stars = '★★☆';
-  document.getElementById('resultStars').textContent = stars;
+  let filledStars = 3;
+  if (score <= 5) filledStars = 1;
+  else if (score <= 7) filledStars = 2;
+  for (let i = 1; i <= 3; i++) {
+    document.getElementById('star' + i).src = i <= filledStars ? 'assets/star-filled.png' : 'assets/star-empty.png';
+  }
+
+  // Mascot expression
+  const resultMascotImg = score >= 8 ? 'assets/mascot-happy.png' : score >= 6 ? 'assets/mascot-normal.png' : 'assets/mascot-sad.png';
+  document.getElementById('resultMascotImg').src = resultMascotImg;
 
   // Comment
   const comments = {
