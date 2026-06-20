@@ -5,25 +5,31 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>算数トレーニング - どの計算かな？</title>
   <link rel="icon" type="image/png" href="assets/favicon.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Yomogi&family=Hachi+Maru+Pop&display=swap" rel="stylesheet">
   <style>
     :root {
-      --purple: #7c3aed;
-      --purple-dark: #5b21b6;
-      --purple-light: #a78bfa;
-      --pink: #ec4899;
-      --pink-light: #f9a8d4;
-      --mint: #10b981;
-      --mint-light: #6ee7b7;
-      --mint-bg: #ecfdf5;
-      --orange: #f97316;
-      --orange-light: #fdba74;
-      --orange-bg: #fff7ed;
+      --purple: #7c5cb0;
+      --purple-dark: #5c4632;
+      --purple-light: #c4a98a;
+      --pink: #d9785f;
+      --pink-light: #f0c4a8;
+      --mint: #5b8c5a;
+      --mint-light: #a8cf9e;
+      --mint-bg: #f1f7ec;
+      --orange: #e0792e;
+      --orange-light: #f4b870;
+      --orange-bg: #fdf1e2;
+      --ink: #5c4632;
     }
     * { box-sizing: border-box; margin: 0; padding: 0; }
 
     body {
-      font-family: 'Hiragino Maru Gothic ProN', 'BIZ UDPGothic', sans-serif;
-      background: linear-gradient(135deg, #ede9fe 0%, #f3e8ff 35%, #fce7f3 70%, #fdf2f8 100%);
+      font-family: 'Hachi Maru Pop', 'Hiragino Maru Gothic ProN', 'BIZ UDPGothic', sans-serif;
+      background-image: url('assets/bg-kraft-paper.png');
+      background-size: 420px 420px;
+      background-repeat: repeat;
       min-height: 100vh;
       display: flex;
       align-items: center;
@@ -45,15 +51,30 @@
     }
 
     .card {
-      background: rgba(255,255,255,0.95);
-      border-radius: 28px;
-      padding: 32px 28px;
-      box-shadow: 0 10px 36px rgba(124,58,237,0.16);
+      position: relative;
+      background-image: url('assets/card-paper-texture.png');
+      background-size: cover;
+      border-radius: 18px 22px 20px 24px;
+      padding: 36px 28px 28px;
+      box-shadow: 0 10px 0 -4px rgba(92,70,50,0.08), 0 14px 30px rgba(92,70,50,0.28);
+      border: 1px solid rgba(92,70,50,0.12);
+    }
+
+    .washi-tape {
+      position: absolute;
+      top: -16px;
+      left: 50%;
+      transform: translateX(-50%) rotate(-3deg);
+      width: 140px;
+      height: auto;
+      z-index: 2;
+      filter: drop-shadow(0 3px 3px rgba(0,0,0,0.15));
     }
 
     h1 {
-      font-size: 1.9rem;
-      color: var(--purple-dark);
+      font-family: 'Yomogi', sans-serif;
+      font-size: 1.85rem;
+      color: var(--ink);
       text-align: center;
       letter-spacing: 1px;
     }
@@ -61,7 +82,7 @@
     .subtitle {
       text-align: center;
       color: var(--pink);
-      font-size: 0.95rem;
+      font-size: 0.92rem;
       font-weight: bold;
       margin-bottom: 8px;
     }
@@ -91,14 +112,15 @@
     }
     .mascot-bubble {
       position: relative;
-      background: #f5f3ff;
-      border: 2px solid var(--purple-light);
-      border-radius: 16px;
+      background: #fffdf6;
+      border: 2px dashed var(--purple-light);
+      border-radius: 4px 16px 14px 16px / 14px 4px 16px 14px;
       padding: 10px 16px;
       font-size: 0.92rem;
-      color: var(--purple-dark);
+      color: var(--ink);
       font-weight: bold;
       flex: 1;
+      box-shadow: 2px 3px 0 rgba(92,70,50,0.08);
     }
     .mascot-bubble::before {
       content: '';
@@ -118,15 +140,19 @@
 
     .stage-card {
       position: relative;
-      background: linear-gradient(135deg, #f5f3ff, #fdf2f8);
-      border: 3px solid var(--purple-light);
-      border-radius: 22px;
+      background: #fffdf6;
+      background-image: url('assets/card-paper-texture.png');
+      background-size: cover;
+      border: 2px solid var(--purple-light);
+      border-radius: 10px 18px 12px 20px;
       padding: 20px 22px;
       cursor: pointer;
       transition: all 0.2s;
+      box-shadow: 3px 4px 0 rgba(92,70,50,0.1);
     }
+    .stage-card:nth-child(2) { transform: rotate(-0.6deg); }
+    .stage-card:nth-child(1) { transform: rotate(0.6deg); }
     .stage-card:hover, .stage-card:active {
-      background: linear-gradient(135deg, var(--purple-light), var(--pink-light));
       border-color: var(--purple);
       transform: scale(1.02);
     }
@@ -153,8 +179,8 @@
     .stage-badge {
       display: inline-block;
       background: var(--purple);
-      color: white;
-      border-radius: 20px;
+      color: #fffdf6;
+      border-radius: 3px 10px 3px 10px;
       padding: 3px 14px;
       font-size: 0.75rem;
       font-weight: bold;
@@ -226,20 +252,21 @@
     }
 
     .answer-btn {
+      font-family: 'Yomogi', sans-serif;
       padding: 20px 12px;
       border: 3px solid var(--purple-light);
-      border-radius: 18px;
-      background: white;
-      font-size: 1.2rem;
+      border-radius: 10px 16px 10px 16px;
+      background: #fffdf6;
+      font-size: 1.25rem;
       font-weight: bold;
-      color: var(--purple-dark);
+      color: var(--ink);
       cursor: pointer;
       transition: all 0.18s;
       letter-spacing: 1px;
       box-shadow: 0 4px 0 var(--purple-light);
     }
     .answer-btn:hover:not(:disabled) {
-      background: linear-gradient(135deg, #f5f3ff, #fdf2f8);
+      background: #fbf6e8;
       transform: translateY(-2px);
     }
     .answer-btn:active:not(:disabled) {
@@ -275,19 +302,35 @@
 
     /* Explanation panel */
     .explain-panel {
+      position: relative;
       display: none;
       margin-top: 20px;
-      border-radius: 18px;
+      border-radius: 6px 16px 6px 16px;
       padding: 16px 18px;
       animation: fadeIn 0.3s ease;
+      overflow: hidden;
     }
     .explain-panel.correct-panel {
       background: var(--mint-bg);
-      border: 2px solid var(--mint);
+      border: 2px dashed var(--mint);
     }
     .explain-panel.wrong-panel {
       background: var(--orange-bg);
-      border: 2px solid var(--orange);
+      border: 2px dashed var(--orange);
+    }
+    .stamp-img {
+      position: absolute;
+      top: 6px;
+      right: 10px;
+      width: 56px;
+      height: 56px;
+      opacity: 0.9;
+      transform: rotate(12deg);
+      animation: stampIn 0.3s ease;
+    }
+    @keyframes stampIn {
+      from { transform: rotate(12deg) scale(1.8); opacity: 0; }
+      to   { transform: rotate(12deg) scale(1); opacity: 0.9; }
     }
     .explain-head {
       display: flex;
@@ -296,6 +339,7 @@
       margin-bottom: 6px;
     }
     .explain-label {
+      font-family: 'Yomogi', sans-serif;
       font-size: 1.2rem;
       font-weight: bold;
     }
@@ -304,14 +348,15 @@
     .explain-text { color: #4a4a4a; font-size: 0.92rem; line-height: 1.6; }
 
     .next-btn {
+      font-family: 'Yomogi', sans-serif;
       display: block;
       width: 100%;
       margin-top: 14px;
       padding: 15px;
       background: linear-gradient(135deg, var(--purple), var(--pink));
-      color: white;
+      color: #fffdf6;
       border: none;
-      border-radius: 18px;
+      border-radius: 8px 18px 8px 18px;
       font-size: 1.05rem;
       font-weight: bold;
       cursor: pointer;
@@ -346,8 +391,9 @@
       margin: 18px 0 20px;
     }
     .stat-box {
-      background: #f5f3ff;
-      border-radius: 16px;
+      background: #fffdf6;
+      border: 2px dashed var(--purple-light);
+      border-radius: 8px 16px 8px 16px;
       padding: 14px 20px;
       text-align: center;
       min-width: 84px;
@@ -360,7 +406,7 @@
     .wrong-item {
       background: var(--orange-bg);
       border-left: 4px solid var(--orange);
-      border-radius: 0 12px 12px 0;
+      border-radius: 0 10px 10px 0;
       padding: 10px 14px;
       margin-bottom: 8px;
       font-size: 0.88rem;
@@ -373,11 +419,12 @@
 
     .result-buttons { display: flex; flex-direction: column; gap: 10px; }
     .btn-primary {
+      font-family: 'Yomogi', sans-serif;
       padding: 16px;
       background: linear-gradient(135deg, var(--purple), var(--pink));
-      color: white;
+      color: #fffdf6;
       border: none;
-      border-radius: 18px;
+      border-radius: 8px 18px 8px 18px;
       font-size: 1.05rem;
       font-weight: bold;
       cursor: pointer;
@@ -385,27 +432,29 @@
     }
     .btn-primary:active { transform: translateY(2px); box-shadow: 0 1px 0 var(--purple-dark); }
     .btn-secondary {
+      font-family: 'Yomogi', sans-serif;
       padding: 13px;
-      background: white;
+      background: #fffdf6;
       color: var(--purple);
-      border: 2.5px solid var(--purple-light);
-      border-radius: 18px;
+      border: 2.5px dashed var(--purple-light);
+      border-radius: 8px 18px 8px 18px;
       font-size: 0.95rem;
       font-weight: bold;
       cursor: pointer;
     }
-    .btn-secondary:hover { background: #f5f3ff; }
+    .btn-secondary:hover { background: #fbf6e8; }
   </style>
 </head>
 <body>
 
 <!-- ミッション選択画面 -->
 <div class="screen active card" id="screenTitle">
+  <img class="washi-tape" src="assets/masking-tape-blue.png" alt="">
   <h1>どの計算？算数ミッション</h1>
   <p class="subtitle">文章題を読んで、つかう計算を当てよう！</p>
 
   <div class="mascot-row">
-    <img class="mascot-img" src="assets/mascot-normal.png" alt="ハカセ">
+    <img class="mascot-img" src="assets/mascot-cat-normal.png" alt="ニャ博士">
     <div class="mascot-bubble" id="titleMascotText">どっちのミッションにチャレンジする？</div>
   </div>
 
@@ -460,15 +509,16 @@
   <div class="trick-banner" id="trickBanner"><img src="assets/trick-alert.png" alt=""><span>ひっかけ問題だよ！気をつけて！</span><img src="assets/trick-alert.png" alt=""></div>
 
   <div class="mascot-row">
-    <img class="mascot-img" src="assets/mascot-normal.png" alt="ハカセ" id="questionMascotImg">
+    <img class="mascot-img" src="assets/mascot-cat-normal.png" alt="ニャ博士" id="questionMascotImg">
     <div class="mascot-bubble question-text" id="questionText">問題文</div>
   </div>
 
   <div class="answer-buttons mode2" id="answerButtons"></div>
 
   <div class="explain-panel" id="explainPanel">
+    <img class="stamp-img" id="stampImg" src="assets/stamp-correct.png" alt="">
     <div class="explain-head">
-      <img class="mascot-img-sm" id="explainMascotImg" src="assets/mascot-happy.png" alt="ハカセ">
+      <img class="mascot-img-sm" id="explainMascotImg" src="assets/mascot-cat-happy.png" alt="ニャ博士">
       <span class="explain-label" id="explainLabel"></span>
     </div>
     <div class="explain-text" id="explainText"></div>
@@ -485,7 +535,7 @@
     <img class="star-icon" id="star3" src="assets/star-filled.png" alt="★">
   </div>
   <div class="mascot-row">
-    <img class="mascot-img" src="assets/mascot-happy.png" alt="ハカセ" id="resultMascotImg">
+    <img class="mascot-img" src="assets/mascot-cat-happy.png" alt="ニャ博士" id="resultMascotImg">
     <div class="mascot-bubble result-comment" id="resultComment"></div>
   </div>
   <div class="result-stats">
@@ -704,7 +754,7 @@ function showQuestion() {
   // Trick banner (10問目 = index 9)
   const banner = document.getElementById('trickBanner');
   banner.style.display = q.isTrick ? 'flex' : 'none';
-  document.getElementById('questionMascotImg').src = q.isTrick ? 'assets/mascot-surprised.png' : 'assets/mascot-normal.png';
+  document.getElementById('questionMascotImg').src = q.isTrick ? 'assets/mascot-cat-surprised.png' : 'assets/mascot-cat-normal.png';
 
   // Question text
   document.getElementById('questionText').textContent = q.text;
@@ -763,7 +813,8 @@ function selectAnswer(selected) {
   const panel = document.getElementById('explainPanel');
   panel.style.display = 'block';
   panel.className = isCorrect ? 'explain-panel correct-panel' : 'explain-panel wrong-panel';
-  document.getElementById('explainMascotImg').src = isCorrect ? 'assets/mascot-happy.png' : 'assets/mascot-sad.png';
+  document.getElementById('explainMascotImg').src = isCorrect ? 'assets/mascot-cat-happy.png' : 'assets/mascot-cat-sad.png';
+  document.getElementById('stampImg').src = isCorrect ? 'assets/stamp-correct.png' : 'assets/stamp-wrong.png';
   document.getElementById('explainLabel').textContent = isCorrect
     ? MASCOT_CORRECT[Math.floor(Math.random() * MASCOT_CORRECT.length)]
     : MASCOT_WRONG[Math.floor(Math.random() * MASCOT_WRONG.length)];
@@ -812,7 +863,7 @@ function showResult() {
   }
 
   // Mascot expression
-  const resultMascotImg = score >= 8 ? 'assets/mascot-happy.png' : score >= 6 ? 'assets/mascot-normal.png' : 'assets/mascot-sad.png';
+  const resultMascotImg = score >= 8 ? 'assets/mascot-cat-happy.png' : score >= 6 ? 'assets/mascot-cat-normal.png' : 'assets/mascot-cat-sad.png';
   document.getElementById('resultMascotImg').src = resultMascotImg;
 
   // Comment
